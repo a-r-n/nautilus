@@ -1376,6 +1376,12 @@ menu "Runtimes"
             help 
               Racket support (via Multiverse only - no special code)
 
+       config JS_RT
+           bool "JavaScript Interpreter"
+           default n
+           help
+             JavaScript Interpreter
+
 endmenu
 
 source "src/dev/Kconfig"
