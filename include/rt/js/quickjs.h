@@ -25,8 +25,7 @@
 #ifndef QUICKJS_H
 #define QUICKJS_H
 
-#include <stdio.h>
-#include <stdint.h>
+#include <nautilus/libccompat.h>
 
 #ifdef __cplusplus
 extern "C" {

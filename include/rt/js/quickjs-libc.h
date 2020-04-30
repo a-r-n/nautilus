@@ -24,10 +24,7 @@
 #ifndef QUICKJS_LIBC_H
 #define QUICKJS_LIBC_H
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "quickjs.h"
+#include <rt/js/quickjs.h>
 
 JSModuleDef *js_init_module_std(JSContext *ctx, const char *module_name);
 JSModuleDef *js_init_module_os(JSContext *ctx, const char *module_name);

@@ -105,6 +105,10 @@ void * kmem_mallocz(size_t size);
 void * kmem_realloc(void * ptr, size_t size);
 void   kmem_free(void * addr);
 
+// Support for malloc_usable_size
+size_t kmem_malloc_usable_size(void * ptr);
+#define malloc_usable_size(p) kmem_malloc_usable_size(p)
+
 // Support functions for garbage collection
 // We currently assume these are done with the world stopped,
 // hence no locking

@@ -25,21 +25,7 @@
 
 #define CONFIG_VERSION "NAUT_0" //TODO
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <inttypes.h>
-#include <string.h>
-#include <assert.h>
-#include <sys/time.h>
-#include <time.h>
-#include <fenv.h>
-#include <math.h>
-#if defined(__APPLE__)
-#include <malloc/malloc.h>
-#elif defined(__linux__)
-#include <malloc.h>
-#endif
+
 
 #include <rt/js/cutils.h>
 #include <rt/js/list.h>

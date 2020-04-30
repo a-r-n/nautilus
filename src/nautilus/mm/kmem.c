@@ -732,6 +732,15 @@ kmem_realloc (void * ptr, size_t size)
 	return tmp;
 }
 
+size_t kmem_malloc_usable_size(void* ptr)
+{
+	struct kmem_block_hdr *hdr = block_hash_find_entry(ptr);
+	if (!hdr) {
+		KMEM_DEBUG("Usable size failed to find entry for block %p\n", ptr);
+		return NULL;
+	}
+	return 1 << hdr->order;
+}
 
 typedef enum {GET,COUNT} stat_type_t;
 
