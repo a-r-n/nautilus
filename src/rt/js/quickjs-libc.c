@@ -62,7 +62,7 @@ typedef struct {
 typedef struct {
     struct list_head link;
     BOOL has_object;
-    int64_t timeout;
+    sint64_t timeout;
     JSValue func;
 } JSOSTimer;
 
@@ -87,8 +87,8 @@ static JSValue js_printf_internal(JSContext *ctx,
     char *q;
     int i, c, len;
     size_t fmt_len;
-    int32_t int32_arg;
-    int64_t int64_arg;
+    sint32_t int32_arg;
+    sint64_t int64_arg;
     double double_arg;
     const char *string_arg;
     enum { PART_FLAGS, PART_WIDTH, PART_DOT, PART_PREC, PART_MODIFIER } part;
@@ -886,7 +886,7 @@ static JSValue js_std_file_tell(JSContext *ctx, JSValueConst this_val,
                                 int argc, JSValueConst *argv, int is_bigint)
 {
     FILE *f = js_std_file_get(ctx, this_val);
-    int64_t pos;
+    sint64_t pos;
     if (!f)
         return JS_EXCEPTION;
 #if defined(__linux__)
@@ -904,7 +904,7 @@ static JSValue js_std_file_seek(JSContext *ctx, JSValueConst this_val,
                                 int argc, JSValueConst *argv)
 {
     FILE *f = js_std_file_get(ctx, this_val);
-    int64_t pos;
+    sint64_t pos;
     int whence, ret;
     if (!f)
         return JS_EXCEPTION;
@@ -1422,7 +1422,7 @@ static JSValue js_os_seek(JSContext *ctx, JSValueConst this_val,
                           int argc, JSValueConst *argv)
 {
     int fd, whence;
-    int64_t pos, ret;
+    sint64_t pos, ret;
     BOOL is_bigint;
     
     if (JS_ToInt32(ctx, &fd, argv[0]))
@@ -1743,7 +1743,7 @@ static JSValue js_os_signal(JSContext *ctx, JSValueConst this_val,
 }
 
 #if defined(__linux__) || defined(__APPLE__)
-static int64_t get_time_ms(void)
+static sint64_t get_time_ms(void)
 {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -1797,7 +1797,7 @@ static void js_os_timer_mark(JSRuntime *rt, JSValueConst val,
 static JSValue js_os_setTimeout(JSContext *ctx, JSValueConst this_val,
                                 int argc, JSValueConst *argv)
 {
-    int64_t delay;
+    sint64_t delay;
     JSValueConst func;
     JSOSTimer *th;
     JSValue obj;
@@ -1929,7 +1929,7 @@ static int js_os_poll(JSContext *ctx)
 static int js_os_poll(JSContext *ctx)
 {
     int ret, fd_max, min_delay;
-    int64_t cur_time, delay;
+    sint64_t cur_time, delay;
     fd_set rfds, wfds;
     JSOSRWHandler *rh;
     struct list_head *el;
@@ -2113,9 +2113,9 @@ static JSValue js_os_mkdir(JSContext *ctx, JSValueConst this_val,
     return JS_NewInt32(ctx, ret);
 }
 
-static int64_t timespec_to_ms(const struct timespec *tv)
+static sint64_t timespec_to_ms(const struct timespec *tv)
 {
-    return (int64_t)tv->tv_sec * 1000 + (tv->tv_nsec / 1000000);
+    return (sint64_t)tv->tv_sec * 1000 + (tv->tv_nsec / 1000000);
 }
 
 /* return [obj, errcode] */
@@ -2293,7 +2293,7 @@ static JSValue js_os_utimes(JSContext *ctx, JSValueConst this_val,
                             int argc, JSValueConst *argv)
 {
     const char *path;
-    int64_t atime, mtime;
+    sint64_t atime, mtime;
     int ret;
     struct timeval times[2];
     
@@ -2690,7 +2690,7 @@ static JSValue js_os_kill(JSContext *ctx, JSValueConst this_val,
 static JSValue js_os_sleep(JSContext *ctx, JSValueConst this_val,
                           int argc, JSValueConst *argv)
 {
-    int64_t delay;
+    sint64_t delay;
     struct timespec ts;
     int ret;
     

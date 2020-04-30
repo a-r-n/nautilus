@@ -901,7 +901,7 @@ struct JSObject {
                 uint16_t *uint16_ptr;   /* JS_CLASS_UINT16_ARRAY */
                 int32_t *int32_ptr;     /* JS_CLASS_INT32_ARRAY */
                 uint32_t *uint32_ptr;   /* JS_CLASS_UINT32_ARRAY */
-                int64_t *int64_ptr;     /* JS_CLASS_INT64_ARRAY */
+                sint64_t *int64_ptr;     /* JS_CLASS_INT64_ARRAY */
                 uint64_t *uint64_ptr;   /* JS_CLASS_UINT64_ARRAY */
                 float *float_ptr;       /* JS_CLASS_FLOAT32_ARRAY */
                 double *double_ptr;     /* JS_CLASS_FLOAT64_ARRAY */
@@ -5633,11 +5633,11 @@ typedef struct JSMemoryUsage_helper {
     double memory_used_count;
     double str_count;
     double str_size;
-    int64_t js_func_count;
+    sint64_t js_func_count;
     double js_func_size;
-    int64_t js_func_code_size;
-    int64_t js_func_pc2line_count;
-    int64_t js_func_pc2line_size;
+    sint64_t js_func_code_size;
+    sint64_t js_func_pc2line_count;
+    sint64_t js_func_pc2line_size;
 } JSMemoryUsage_helper;
 
 static void compute_value_size(JSValueConst val, JSMemoryUsage_helper *hp);
@@ -6004,7 +6004,7 @@ void JS_DumpMemoryUsage(FILE *fp, const JSMemoryUsage *s, JSRuntime *rt)
             "BigNum "
 #endif
             "%s version, %d-bit, malloc limit: %"PRId64"\n\n",
-            CONFIG_VERSION, (int)sizeof(void *) * 8, (int64_t)(ssize_t)s->malloc_limit);
+            CONFIG_VERSION, (int)sizeof(void *) * 8, (sint64_t)(ssize_t)s->malloc_limit);
 #if 1
     if (rt) {
         static const struct {
@@ -7616,7 +7616,7 @@ JSValue JS_GetPropertyUint32(JSContext *ctx, JSValueConst this_obj,
    TRUE if property exists, stored into *pval,
    FALSE if proprty does not exist.
  */
-static int JS_TryGetPropertyInt64(JSContext *ctx, JSValueConst obj, int64_t idx, JSValue *pval)
+static int JS_TryGetPropertyInt64(JSContext *ctx, JSValueConst obj, sint64_t idx, JSValue *pval)
 {
     JSValue val = JS_UNDEFINED;
     JSAtom prop;
@@ -7647,7 +7647,7 @@ static int JS_TryGetPropertyInt64(JSContext *ctx, JSValueConst obj, int64_t idx,
     return present;
 }
 
-static JSValue JS_GetPropertyInt64(JSContext *ctx, JSValueConst obj, int64_t idx)
+static JSValue JS_GetPropertyInt64(JSContext *ctx, JSValueConst obj, sint64_t idx)
 {
     JSAtom prop;
     JSValue val;
@@ -8445,7 +8445,7 @@ int JS_SetPropertyUint32(JSContext *ctx, JSValueConst this_obj,
 }
 
 int JS_SetPropertyInt64(JSContext *ctx, JSValueConst this_obj,
-                        int64_t idx, JSValue val)
+                        sint64_t idx, JSValue val)
 {
     JSAtom prop;
     int res;
@@ -9007,7 +9007,7 @@ int JS_DefinePropertyValueUint32(JSContext *ctx, JSValueConst this_obj,
 }
 
 int JS_DefinePropertyValueInt64(JSContext *ctx, JSValueConst this_obj,
-                                int64_t idx, JSValue val, int flags)
+                                sint64_t idx, JSValue val, int flags)
 {
     return JS_DefinePropertyValueValue(ctx, this_obj, JS_NewInt64(ctx, idx),
                                        val, flags);
@@ -9039,7 +9039,7 @@ int JS_DefinePropertyGetSet(JSContext *ctx, JSValueConst this_obj,
 }
 
 static int JS_CreateDataPropertyUint32(JSContext *ctx, JSValueConst this_obj,
-                                       int64_t idx, JSValue val, int flags)
+                                       sint64_t idx, JSValue val, int flags)
 {
     return JS_DefinePropertyValueValue(ctx, this_obj, JS_NewInt64(ctx, idx),
                                        val, flags | JS_PROP_CONFIGURABLE |
@@ -9348,7 +9348,7 @@ int JS_DeleteProperty(JSContext *ctx, JSValueConst obj, JSAtom prop, int flags)
     return FALSE;
 }
 
-int JS_DeletePropertyInt64(JSContext *ctx, JSValueConst obj, int64_t idx, int flags)
+int JS_DeletePropertyInt64(JSContext *ctx, JSValueConst obj, sint64_t idx, int flags)
 {
     JSAtom prop;
     int res;
@@ -10376,7 +10376,7 @@ static int JS_ToInt64SatFree(JSContext *ctx, int64_t *pres, JSValue val)
                 else if (d > INT64_MAX)
                     *pres = INT64_MAX;
                 else
-                    *pres = (int64_t)d;
+                    *pres = (sint64_t)d;
             }
         }
         return 0;
@@ -10399,13 +10399,13 @@ static int JS_ToInt64SatFree(JSContext *ctx, int64_t *pres, JSValue val)
     }
 }
 
-int JS_ToInt64Sat(JSContext *ctx, int64_t *pres, JSValueConst val)
+int JS_ToInt64Sat(JSContext *ctx, sint64_t *pres, JSValueConst val)
 {
     return JS_ToInt64SatFree(ctx, pres, JS_DupValue(ctx, val));
 }
 
-int JS_ToInt64Clamp(JSContext *ctx, int64_t *pres, JSValueConst val,
-                    int64_t min, int64_t max, int64_t neg_offset)
+int JS_ToInt64Clamp(JSContext *ctx, sint64_t *pres, JSValueConst val,
+                    sint64_t min, sint64_t max, int64_t neg_offset)
 {
     int res = JS_ToInt64SatFree(ctx, pres, JS_DupValue(ctx, val));
     if (res == 0) {
@@ -10421,10 +10421,10 @@ int JS_ToInt64Clamp(JSContext *ctx, int64_t *pres, JSValueConst val,
 
 /* Same as JS_ToInt32Free() but with a 64 bit result. Return (<0, 0)
    in case of exception */
-static int JS_ToInt64Free(JSContext *ctx, int64_t *pres, JSValue val)
+static int JS_ToInt64Free(JSContext *ctx, sint64_t *pres, JSValue val)
 {
     uint32_t tag;
-    int64_t ret;
+    sint64_t ret;
 
  redo:
     tag = JS_VALUE_GET_NORM_TAG(val);
@@ -10446,7 +10446,7 @@ static int JS_ToInt64Free(JSContext *ctx, int64_t *pres, JSValue val)
             e = (u.u64 >> 52) & 0x7ff;
             if (likely(e <= (1023 + 62))) {
                 /* fast case */
-                ret = (int64_t)d;
+                ret = (sint64_t)d;
             } else if (e <= (1023 + 62 + 53)) {
                 uint64_t v;
                 /* remainder modulo 2^64 */
@@ -10481,12 +10481,12 @@ static int JS_ToInt64Free(JSContext *ctx, int64_t *pres, JSValue val)
     return 0;
 }
 
-int JS_ToInt64(JSContext *ctx, int64_t *pres, JSValueConst val)
+int JS_ToInt64(JSContext *ctx, sint64_t *pres, JSValueConst val)
 {
     return JS_ToInt64Free(ctx, pres, JS_DupValue(ctx, val));
 }
 
-int JS_ToInt64Ext(JSContext *ctx, int64_t *pres, JSValueConst val)
+int JS_ToInt64Ext(JSContext *ctx, sint64_t *pres, JSValueConst val)
 {
     if (JS_IsBigInt(ctx, val))
         return JS_ToBigInt64(ctx, pres, val);
@@ -10694,7 +10694,7 @@ static BOOL is_safe_integer(double d)
 
 int JS_ToIndex(JSContext *ctx, uint64_t *plen, JSValueConst val)
 {
-    int64_t v;
+    sint64_t v;
     if (JS_ToInt64Sat(ctx, &v, val))
         return -1;
     if (v < 0 || v > MAX_SAFE_INTEGER) {
@@ -10708,7 +10708,7 @@ int JS_ToIndex(JSContext *ctx, uint64_t *plen, JSValueConst val)
 
 /* convert a value to a length between 0 and MAX_SAFE_INTEGER.
    return -1 for exception */
-static __exception int JS_ToLengthFree(JSContext *ctx, int64_t *plen,
+static __exception int JS_ToLengthFree(JSContext *ctx, sint64_t *plen,
                                        JSValue val)
 {
     int res = JS_ToInt64Clamp(ctx, plen, val, 0, MAX_SAFE_INTEGER, 0);
@@ -10890,7 +10890,7 @@ static JSValue js_bigdecimal_to_string(JSContext *ctx, JSValueConst val)
 #endif /* CONFIG_BIGNUM */
 
 /* 2 <= base <= 36 */
-static char *i64toa(char *buf_end, int64_t n, unsigned int base)
+static char *i64toa(char *buf_end, sint64_t n, unsigned int base)
 {
     char *q = buf_end;
     int digit, is_neg;
@@ -11072,9 +11072,9 @@ static void js_dtoa1(char *buf, double d, int radix, int n_digits, int flags)
             strcpy(q, "Infinity");
         }
     } else if (flags == JS_DTOA_VAR_FORMAT) {
-        int64_t i64;
+        sint64_t i64;
         char buf1[70], *ptr;
-        i64 = (int64_t)d;
+        i64 = (sint64_t)d;
         if (d != i64 || i64 > MAX_SAFE_INTEGER || i64 < -MAX_SAFE_INTEGER)
             goto generic_conv;
         /* fast path for integers */
@@ -13763,7 +13763,7 @@ static JSValue JS_ThrowUnsupportedBigint(JSContext *ctx)
     return JS_ThrowTypeError(ctx, "bigint is not supported");
 }
 
-JSValue JS_NewBigInt64(JSContext *ctx, int64_t v)
+JSValue JS_NewBigInt64(JSContext *ctx, sint64_t v)
 {
     return JS_ThrowUnsupportedBigint(ctx);
 }
@@ -13773,7 +13773,7 @@ JSValue JS_NewBigUint64(JSContext *ctx, uint64_t v)
     return JS_ThrowUnsupportedBigint(ctx);
 }
 
-int JS_ToBigInt64(JSContext *ctx, int64_t *pres, JSValueConst val)
+int JS_ToBigInt64(JSContext *ctx, sint64_t *pres, JSValueConst val)
 {
     JS_ThrowUnsupportedBigint(ctx);
     *pres = 0;
@@ -15152,7 +15152,7 @@ static __exception int js_append_enumerate(JSContext *ctx, JSValue *sp)
     if (is_array_iterator
     &&  JS_IsCFunction(ctx, method, (JSCFunction *)js_array_iterator_next, 0)
     &&  js_get_fast_array(ctx, sp[-1], &arrp, &count32)) {
-        int64_t len;
+        sint64_t len;
         /* Handle fast arrays explicitly */
         if (js_get_length64(ctx, &len, sp[-1]))
             goto exception;
@@ -17499,8 +17499,8 @@ static JSValue JS_CallInternal(JSContext *caller_ctx, JSValueConst func_obj,
                 op1 = sp[-2];
                 op2 = sp[-1];
                 if (likely(JS_VALUE_IS_BOTH_INT(op1, op2))) {
-                    int64_t r;
-                    r = (int64_t)JS_VALUE_GET_INT(op1) + JS_VALUE_GET_INT(op2);
+                    sint64_t r;
+                    r = (sint64_t)JS_VALUE_GET_INT(op1) + JS_VALUE_GET_INT(op2);
                     if (unlikely((int)r != r))
                         goto add_slow;
                     sp[-2] = JS_NewInt32(ctx, r);
@@ -17527,8 +17527,8 @@ static JSValue JS_CallInternal(JSContext *caller_ctx, JSValueConst func_obj,
                 ops[0] = var_buf[idx];
                 ops[1] = sp[-1];
                 if (likely(JS_VALUE_IS_BOTH_INT(ops[0], ops[1]))) {
-                    int64_t r;
-                    r = (int64_t)JS_VALUE_GET_INT(ops[0]) + JS_VALUE_GET_INT(ops[1]);
+                    sint64_t r;
+                    r = (sint64_t)JS_VALUE_GET_INT(ops[0]) + JS_VALUE_GET_INT(ops[1]);
                     if (unlikely((int)r != r))
                         goto add_loc_slow;
                     var_buf[idx] = JS_NewInt32(ctx, r);
@@ -17569,8 +17569,8 @@ static JSValue JS_CallInternal(JSContext *caller_ctx, JSValueConst func_obj,
                 op1 = sp[-2];
                 op2 = sp[-1];
                 if (likely(JS_VALUE_IS_BOTH_INT(op1, op2))) {
-                    int64_t r;
-                    r = (int64_t)JS_VALUE_GET_INT(op1) - JS_VALUE_GET_INT(op2);
+                    sint64_t r;
+                    r = (sint64_t)JS_VALUE_GET_INT(op1) - JS_VALUE_GET_INT(op2);
                     if (unlikely((int)r != r))
                         goto binary_arith_slow;
                     sp[-2] = JS_NewInt32(ctx, r);
@@ -17592,10 +17592,10 @@ static JSValue JS_CallInternal(JSContext *caller_ctx, JSValueConst func_obj,
                 op2 = sp[-1];
                 if (likely(JS_VALUE_IS_BOTH_INT(op1, op2))) {
                     int32_t v1, v2;
-                    int64_t r;
+                    sint64_t r;
                     v1 = JS_VALUE_GET_INT(op1);
                     v2 = JS_VALUE_GET_INT(op2);
-                    r = (int64_t)v1 * v2;
+                    r = (sint64_t)v1 * v2;
                     if (unlikely((int)r != r)) {
 #ifdef CONFIG_BIGNUM
                         if (unlikely(sf->js_mode & JS_MODE_MATH) &&
@@ -36360,7 +36360,7 @@ static JSValue iterator_to_array(JSContext *ctx, JSValueConst items)
 {
     JSValue iter, next_method = JS_UNDEFINED;
     JSValue v, r = JS_UNDEFINED;
-    int64_t k;
+    sint64_t k;
     BOOL done;
     
     iter = JS_GetIterator(ctx, items, FALSE);
@@ -36542,9 +36542,9 @@ static const JSCFunctionListEntry js_aggregate_error_proto_funcs[] = {
 
 static int JS_CopySubArray(JSContext *ctx,
                            JSValueConst obj, int64_t to_pos,
-                           int64_t from_pos, int64_t count, int dir)
+                           sint64_t from_pos, int64_t count, int dir)
 {
-    int64_t i, from, to;
+    sint64_t i, from, to;
     JSValue val;
     int fromPresent;
 
@@ -36610,7 +36610,7 @@ static JSValue js_array_from(JSContext *ctx, JSValueConst this_val,
     JSValueConst args[2];
     JSValue stack[2];
     JSValue iter, r, v, v2, arrayLike;
-    int64_t k, len;
+    sint64_t k, len;
     int done, mapping;
 
     mapping = FALSE;
@@ -36832,7 +36832,7 @@ static JSValue js_array_concat(JSContext *ctx, JSValueConst this_val,
 {
     JSValue obj, arr, val;
     JSValueConst e;
-    int64_t len, k, n;
+    sint64_t len, k, n;
     int i, res;
 
     arr = JS_UNDEFINED;
@@ -36912,7 +36912,7 @@ static JSValue js_array_every(JSContext *ctx, JSValueConst this_val,
     JSValue obj, val, index_val, res, ret;
     JSValueConst args[3];
     JSValueConst func, this_arg;
-    int64_t len, k, n;
+    sint64_t len, k, n;
     int present;
 
     ret = JS_UNDEFINED;
@@ -37060,7 +37060,7 @@ static JSValue js_array_reduce(JSContext *ctx, JSValueConst this_val,
     JSValue obj, val, index_val, acc, acc1;
     JSValueConst args[4];
     JSValueConst func;
-    int64_t len, k, k1;
+    sint64_t len, k, k1;
     int present;
 
     acc = JS_UNDEFINED;
@@ -37135,7 +37135,7 @@ static JSValue js_array_fill(JSContext *ctx, JSValueConst this_val,
                              int argc, JSValueConst *argv)
 {
     JSValue obj;
-    int64_t len, start, end;
+    sint64_t len, start, end;
 
     obj = JS_ToObject(ctx, this_val);
     if (js_get_length64(ctx, &len, obj))
@@ -37171,7 +37171,7 @@ static JSValue js_array_includes(JSContext *ctx, JSValueConst this_val,
                                  int argc, JSValueConst *argv)
 {
     JSValue obj, val;
-    int64_t len, n, res;
+    sint64_t len, n, res;
     JSValue *arrp;
     uint32_t count;
 
@@ -37220,7 +37220,7 @@ static JSValue js_array_indexOf(JSContext *ctx, JSValueConst this_val,
                                 int argc, JSValueConst *argv)
 {
     JSValue obj, val;
-    int64_t len, n, res;
+    sint64_t len, n, res;
     JSValue *arrp;
     uint32_t count;
 
@@ -37269,7 +37269,7 @@ static JSValue js_array_lastIndexOf(JSContext *ctx, JSValueConst this_val,
                                     int argc, JSValueConst *argv)
 {
     JSValue obj, val;
-    int64_t len, n, res;
+    sint64_t len, n, res;
     int present;
 
     obj = JS_ToObject(ctx, this_val);
@@ -37310,7 +37310,7 @@ static JSValue js_array_find(JSContext *ctx, JSValueConst this_val,
     JSValueConst func, this_arg;
     JSValueConst args[3];
     JSValue obj, val, index_val, res;
-    int64_t len, k;
+    sint64_t len, k;
 
     index_val = JS_UNDEFINED;
     val = JS_UNDEFINED;
@@ -37395,7 +37395,7 @@ static JSValue js_array_join(JSContext *ctx, JSValueConst this_val,
     JSValue obj, sep = JS_UNDEFINED, el;
     StringBuffer b_s, *b = &b_s;
     JSString *p = NULL;
-    int64_t i, n;
+    sint64_t i, n;
     int c;
 
     obj = JS_ToObject(ctx, this_val);
@@ -37450,7 +37450,7 @@ static JSValue js_array_pop(JSContext *ctx, JSValueConst this_val,
                             int argc, JSValueConst *argv, int shift)
 {
     JSValue obj, res = JS_UNDEFINED;
-    int64_t len, newLen;
+    sint64_t len, newLen;
     JSValue *arrp;
     uint32_t count32;
 
@@ -37504,7 +37504,7 @@ static JSValue js_array_push(JSContext *ctx, JSValueConst this_val,
 {
     JSValue obj;
     int i;
-    int64_t len, from, newLen;
+    sint64_t len, from, newLen;
 
     obj = JS_ToObject(ctx, this_val);
     if (js_get_length64(ctx, &len, obj))
@@ -37541,7 +37541,7 @@ static JSValue js_array_reverse(JSContext *ctx, JSValueConst this_val,
 {
     JSValue obj, lval, hval;
     JSValue *arrp;
-    int64_t len, l, h;
+    sint64_t len, l, h;
     int l_present, h_present;
     uint32_t count32;
 
@@ -37609,7 +37609,7 @@ static JSValue js_array_slice(JSContext *ctx, JSValueConst this_val,
                               int argc, JSValueConst *argv, int splice)
 {
     JSValue obj, arr, val, len_val;
-    int64_t len, start, k, final, n, count, del_count, new_len;
+    sint64_t len, start, k, final, n, count, del_count, new_len;
     int kPresent;
     JSValue *arrp;
     uint32_t count32, i, item_count;
@@ -37716,7 +37716,7 @@ static JSValue js_array_copyWithin(JSContext *ctx, JSValueConst this_val,
                                    int argc, JSValueConst *argv)
 {
     JSValue obj;
-    int64_t len, from, to, final, count;
+    sint64_t len, from, to, final, count;
 
     obj = JS_ToObject(ctx, this_val);
     if (js_get_length64(ctx, &len, obj))
@@ -37747,14 +37747,14 @@ static JSValue js_array_copyWithin(JSContext *ctx, JSValueConst this_val,
     return JS_EXCEPTION;
 }
 
-static int64_t JS_FlattenIntoArray(JSContext *ctx, JSValueConst target,
+static sint64_t JS_FlattenIntoArray(JSContext *ctx, JSValueConst target,
                                    JSValueConst source, int64_t sourceLen,
-                                   int64_t targetIndex, int depth,
+                                   sint64_t targetIndex, int depth,
                                    JSValueConst mapperFunction,
                                    JSValueConst thisArg)
 {
     JSValue element;
-    int64_t sourceIndex, elementLen;
+    sint64_t sourceIndex, elementLen;
     int present, is_array;
 
     for (sourceIndex = 0; sourceIndex < sourceLen; sourceIndex++) {
@@ -37809,7 +37809,7 @@ static JSValue js_array_flatten(JSContext *ctx, JSValueConst this_val,
 {
     JSValue obj, arr;
     JSValueConst mapperFunction, thisArg;
-    int64_t sourceLen;
+    sint64_t sourceLen;
     int depthNum;
 
     arr = JS_UNDEFINED;
@@ -37853,7 +37853,7 @@ exception:
 typedef struct ValueSlot {
     JSValue val;
     JSString *str;
-    int64_t pos;
+    sint64_t pos;
 } ValueSlot;
 
 struct array_sort_context {
@@ -37931,7 +37931,7 @@ static JSValue js_array_sort(JSContext *ctx, JSValueConst this_val,
     JSValue obj = JS_UNDEFINED;
     ValueSlot *array = NULL;
     size_t array_size = 0, pos = 0, n = 0;
-    int64_t i, len, undefined_count = 0;
+    sint64_t i, len, undefined_count = 0;
     int present;
 
     if (!JS_IsUndefined(asc.method)) {
@@ -38799,7 +38799,7 @@ static JSValue js_string_raw(JSContext *ctx, JSValueConst this_val,
     // raw(temp,...a)
     JSValue cooked, val, raw;
     StringBuffer b_s, *b = &b_s;
-    int64_t i, n;
+    sint64_t i, n;
 
     string_buffer_init(ctx, b, 0);
     raw = JS_UNDEFINED;
@@ -39016,7 +39016,7 @@ static int string_indexof(JSString *p1, JSString *p2, int from)
     return -1;
 }
 
-static int64_t string_advance_index(JSString *p, int64_t index, BOOL unicode)
+static sint64_t string_advance_index(JSString *p, int64_t index, BOOL unicode)
 {
     if (!unicode || index >= p->len || !p->is_wide_char) {
         index++;
@@ -39462,7 +39462,7 @@ static JSValue js_string_split(JSContext *ctx, JSValueConst this_val,
     JSValueConst args[2];
     JSValue S, A, R, T;
     uint32_t lim, lengthA;
-    int64_t p, q, s, r, e;
+    sint64_t p, q, s, r, e;
     JSString *sp, *rp;
 
     if (JS_IsUndefined(O) || JS_IsNull(O))
@@ -39711,7 +39711,7 @@ static JSValue js_string_repeat(JSContext *ctx, JSValueConst this_val,
     JSValue str;
     StringBuffer b_s, *b = &b_s;
     JSString *p;
-    int64_t val;
+    sint64_t val;
     int n, len;
 
     str = JS_ToStringCheckObject(ctx, this_val);
@@ -40454,7 +40454,7 @@ static void js_random_init(JSContext *ctx)
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    ctx->random_state = ((int64_t)tv.tv_sec * 1000000) + tv.tv_usec;
+    ctx->random_state = ((sint64_t)tv.tv_sec * 1000000) + tv.tv_usec;
     /* the state must be non zero */
     if (ctx->random_state == 0)
         ctx->random_state = 1;
@@ -40544,10 +40544,10 @@ static JSValue js___date_now(JSContext *ctx, JSValueConst this_val,
 static JSValue js___date_clock(JSContext *ctx, JSValueConst this_val,
                                int argc, JSValueConst *argv)
 {
-    int64_t d;
+    sint64_t d;
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    d = (int64_t)tv.tv_sec * 1000000 + tv.tv_usec;
+    d = (sint64_t)tv.tv_sec * 1000000 + tv.tv_usec;
     return JS_NewInt64(ctx, d);
 }
 
@@ -41089,7 +41089,7 @@ static JSValue js_regexp_exec(JSContext *ctx, JSValueConst this_val,
     int ret;
     uint8_t **capture, *str_buf;
     int capture_count, shift, i, re_flags;
-    int64_t last_index;
+    sint64_t last_index;
     const char *group_name_ptr;
 
     if (!re)
@@ -41219,7 +41219,7 @@ static JSValue JS_RegExpDelete(JSContext *ctx, JSValueConst this_val, JSValueCon
     uint8_t **capture, *str_buf;
     int capture_count, shift, re_flags;
     int next_src_pos, start, end;
-    int64_t last_index;
+    sint64_t last_index;
     StringBuffer b_s, *b = &b_s;
 
     if (!re)
@@ -41402,7 +41402,7 @@ static JSValue js_regexp_Symbol_match(JSContext *ctx, JSValueConst this_val,
             if (JS_SetPropertyInt64(ctx, A, n++, matchStr) < 0)
                 goto exception;
             if (isEmpty) {
-                int64_t thisIndex, nextIndex;
+                sint64_t thisIndex, nextIndex;
                 if (JS_ToLengthFree(ctx, &thisIndex,
                                     JS_GetProperty(ctx, rx, JS_ATOM_lastIndex)) < 0)
                     goto exception;
@@ -41489,7 +41489,7 @@ static JSValue js_regexp_string_iterator_next(JSContext *ctx,
         if (JS_IsException(matchStr))
             goto exception;
         if (JS_IsEmptyString(matchStr)) {
-            int64_t thisIndex, nextIndex;
+            sint64_t thisIndex, nextIndex;
             if (JS_ToLengthFree(ctx, &thisIndex,
                                 JS_GetProperty(ctx, R, JS_ATOM_lastIndex)) < 0)
                 goto exception;
@@ -41520,7 +41520,7 @@ static JSValue js_regexp_Symbol_matchAll(JSContext *ctx, JSValueConst this_val,
     JSValue S, C, flags, matcher, iter;
     JSValueConst args[2];
     JSString *strp;
-    int64_t lastIndex;
+    sint64_t lastIndex;
     JSRegExpStringIteratorData *it;
     
     if (!JS_IsObject(R))
@@ -41672,7 +41672,7 @@ static JSValue js_regexp_Symbol_replace(JSContext *ctx, JSValueConst this_val,
     ValueBuffer v_b, *results = &v_b;
     int nextSourcePosition, n, j, functionalReplace, is_global, fullUnicode;
     uint32_t nCaptures;
-    int64_t position;
+    sint64_t position;
 
     if (!JS_IsObject(rx))
         return JS_ThrowTypeErrorNotAnObject(ctx);
@@ -41733,7 +41733,7 @@ static JSValue js_regexp_Symbol_replace(JSContext *ctx, JSValueConst this_val,
             goto exception;
         if (JS_IsEmptyString(matched)) {
             /* always advance of at least one char */
-            int64_t thisIndex, nextIndex;
+            sint64_t thisIndex, nextIndex;
             if (JS_ToLengthFree(ctx, &thisIndex, JS_GetProperty(ctx, rx, JS_ATOM_lastIndex)) < 0)
                 goto exception;
             nextIndex = string_advance_index(sp, thisIndex, fullUnicode);
@@ -41907,7 +41907,7 @@ static JSValue js_regexp_Symbol_split(JSContext *ctx, JSValueConst this_val,
     JSString *strp;
     uint32_t lim, size, p, q;
     int unicodeMatching;
-    int64_t lengthA, e, numberOfCaptures, i;
+    sint64_t lengthA, e, numberOfCaptures, i;
 
     if (!JS_IsObject(rx))
         return JS_ThrowTypeErrorNotAnObject(ctx);
@@ -42429,7 +42429,7 @@ static int js_json_to_str(JSContext *ctx, JSONStringifyContext *jsc,
 {
     JSValue indent1, sep, sep1, tab, v, prop;
     JSObject *p;
-    int64_t i, len;
+    sint64_t i, len;
     int cl, ret;
     BOOL has_content;
     
@@ -42625,7 +42625,7 @@ JSValue JS_JSONStringify(JSContext *ctx, JSValueConst obj,
     JSONStringifyContext jsc_s, *jsc = &jsc_s;
     JSValue val, v, space, ret, wrapper;
     int res;
-    int64_t i, j, n;
+    sint64_t i, j, n;
 
     jsc->replacer_func = JS_UNDEFINED;
     jsc->stack = JS_UNDEFINED;
@@ -46429,15 +46429,15 @@ static const JSCFunctionListEntry js_global_funcs[] = {
 
 /* Date */
 
-static int64_t math_mod(int64_t a, int64_t b) {
+static sint64_t math_mod(int64_t a, sint64_t b) {
     /* return positive modulo */
-    int64_t m = a % b;
+    sint64_t m = a % b;
     return m + (m < 0) * b;
 }
 
-static int64_t floor_div(int64_t a, int64_t b) {
+static sint64_t floor_div(int64_t a, sint64_t b) {
     /* integer division rounding toward -Infinity */
-    int64_t m = a % b;
+    sint64_t m = a % b;
     return (a - (m + (m < 0) * b)) / b;
 }
 
@@ -46468,18 +46468,18 @@ static JSValue JS_SetThisTimeValue(JSContext *ctx, JSValueConst this_val, double
     return JS_ThrowTypeError(ctx, "not a Date object");
 }
 
-static int64_t days_from_year(int64_t y) {
+static sint64_t days_from_year(int64_t y) {
     return 365 * (y - 1970) + floor_div(y - 1969, 4) -
         floor_div(y - 1901, 100) + floor_div(y - 1601, 400);
 }
 
-static int64_t days_in_year(int64_t y) {
+static sint64_t days_in_year(int64_t y) {
     return 365 + !(y % 4) - !(y % 100) + !(y % 400);
 }
 
 /* return the year, update days */
-static int64_t year_from_days(int64_t *days) {
-    int64_t y, d1, nd, d = *days;
+static sint64_t year_from_days(int64_t *days) {
+    sint64_t y, d1, nd, d = *days;
     y = floor_div(d * 10000, 3652425) + 1970;
     /* the initial approximation is very good, so only a few
        iterations are necessary */
@@ -46508,7 +46508,7 @@ static __exception int get_date_fields(JSContext *ctx, JSValueConst obj,
                                        int64_t fields[9], int is_local, int force)
 {
     double dval;
-    int64_t d, days, wd, y, i, md, h, m, s, ms, tz = 0;
+    sint64_t d, days, wd, y, i, md, h, m, s, ms, tz = 0;
 
     if (JS_ThisTimeValue(ctx, &dval, obj))
         return -1;
@@ -46564,8 +46564,8 @@ static double time_clip(double t) {
         return NAN;
 }
 
-static double set_date_fields(int64_t fields[], int is_local) {
-    int64_t days, y, m, md, h, d, i;
+static double set_date_fields(sint64_t fields[], int is_local) {
+    sint64_t days, y, m, md, h, d, i;
 
     i = fields[1];
     m = math_mod(i, 12);
@@ -46590,7 +46590,7 @@ static JSValue get_date_field(JSContext *ctx, JSValueConst this_val,
                               int argc, JSValueConst *argv, int magic)
 {
     // get_date_field(obj, n, is_local)
-    int64_t fields[9];
+    sint64_t fields[9];
     int res, n, is_local;
 
     is_local = magic & 0x0F;
@@ -46611,7 +46611,7 @@ static JSValue set_date_field(JSContext *ctx, JSValueConst this_val,
                               int argc, JSValueConst *argv, int magic)
 {
     // _field(obj, first_field, end_field, args, is_local)
-    int64_t fields[9];
+    sint64_t fields[9];
     int res, first_field, end_field, is_local, i, n;
     double d, a;
 
@@ -46653,7 +46653,7 @@ static JSValue get_date_string(JSContext *ctx, JSValueConst this_val,
 {
     // _string(obj, fmt, part)
     char buf[64];
-    int64_t fields[9];
+    sint64_t fields[9];
     int res, fmt, part, pos;
     int y, mon, d, h, m, s, ms, wd, tz;
 
@@ -46755,10 +46755,10 @@ static JSValue get_date_string(JSContext *ctx, JSValueConst this_val,
 }
 
 /* OS dependent: return the UTC time in ms since 1970. */
-static int64_t date_now(void) {
+static sint64_t date_now(void) {
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    return (int64_t)tv.tv_sec * 1000 + (tv.tv_usec / 1000);
+    return (sint64_t)tv.tv_sec * 1000 + (tv.tv_usec / 1000);
 }
 
 static JSValue js_date_constructor(JSContext *ctx, JSValueConst new_target,
@@ -46801,7 +46801,7 @@ static JSValue js_date_constructor(JSContext *ctx, JSValueConst new_target,
         }
         val = time_clip(val);
     } else {
-        int64_t fields[] = { 0, 0, 1, 0, 0, 0, 0 };
+        sint64_t fields[] = { 0, 0, 1, 0, 0, 0, 0 };
         if (n > 7)
             n = 7;
         for(i = 0; i < n; i++) {
@@ -46841,7 +46841,7 @@ static JSValue js_Date_UTC(JSContext *ctx, JSValueConst this_val,
                            int argc, JSValueConst *argv)
 {
     // UTC(y, mon, d, h, m, s, ms)
-    int64_t fields[] = { 0, 0, 1, 0, 0, 0, 0 };
+    sint64_t fields[] = { 0, 0, 1, 0, 0, 0, 0 };
     int i, n;
     double a;
 
@@ -46874,7 +46874,7 @@ static void string_skip_non_spaces(JSString *sp, int *pp) {
 
 /* parse a numeric field */
 static int string_get_field(JSString *sp, int *pp, int64_t *pval) {
-    int64_t v = 0;
+    sint64_t v = 0;
     int c, p = *pp;
 
     /* skip non digits, should only skip spaces? */
@@ -46899,8 +46899,8 @@ static int string_get_field(JSString *sp, int *pp, int64_t *pval) {
 }
 
 /* parse a fixed width numeric field */
-static int string_get_digits(JSString *sp, int *pp, int n, int64_t *pval) {
-    int64_t v = 0;
+static int string_get_digits(JSString *sp, int *pp, int n, sint64_t *pval) {
+    sint64_t v = 0;
     int i, c, p = *pp;
 
     for(i = 0; i < n; i++) {
@@ -46918,7 +46918,7 @@ static int string_get_digits(JSString *sp, int *pp, int n, int64_t *pval) {
 }
 
 /* parse a signed numeric field */
-static int string_get_signed_field(JSString *sp, int *pp, int64_t *pval) {
+static int string_get_signed_field(JSString *sp, int *pp, sint64_t *pval) {
     int sgn, res;
 
     if (*pp >= sp->len)
@@ -46950,7 +46950,7 @@ static int find_abbrev(JSString *sp, int p, const char *list, int count) {
     return -1;
 }
 
-static int string_get_month(JSString *sp, int *pp, int64_t *pval) {
+static int string_get_month(JSString *sp, int *pp, sint64_t *pval) {
     int n;
 
     string_skip_spaces(sp, pp);
@@ -46968,8 +46968,8 @@ static JSValue js_Date_parse(JSContext *ctx, JSValueConst this_val,
 {
     // parse(s)
     JSValue s, rv;
-    int64_t fields[] = { 0, 1, 1, 0, 0, 0, 0 };
-    int64_t tz, hh, mm;
+    sint64_t fields[] = { 0, 1, 1, 0, 0, 0, 0 };
+    sint64_t tz, hh, mm;
     double d;
     int p, i, c, sgn;
     JSString *sp;
@@ -47141,7 +47141,7 @@ static JSValue js_date_getTimezoneOffset(JSContext *ctx, JSValueConst this_val,
     if (isnan(v))
         return JS_NAN;
     else
-        return JS_NewInt64(ctx, getTimezoneOffset((int64_t)trunc(v)));
+        return JS_NewInt64(ctx, getTimezoneOffset((sint64_t)trunc(v)));
 }
 
 static JSValue js_date_getTime(JSContext *ctx, JSValueConst this_val,
@@ -49832,7 +49832,7 @@ static JSValue js_array_buffer_slice(JSContext *ctx,
                                      int argc, JSValueConst *argv, int class_id)
 {
     JSArrayBuffer *abuf, *new_abuf;
-    int64_t len, start, end, new_len;
+    sint64_t len, start, end, new_len;
     JSValue ctor, new_obj;
 
     abuf = JS_GetOpaque2(ctx, this_val, class_id);
@@ -50074,7 +50074,7 @@ static JSValue js_typed_array_set_internal(JSContext *ctx,
     JSObject *p;
     JSObject *src_p;
     uint32_t i;
-    int64_t src_len, offset;
+    sint64_t src_len, offset;
     JSValue val, src_obj = JS_UNDEFINED;
 
     p = get_typed_array(ctx, dst, 0);
@@ -50105,7 +50105,7 @@ static JSValue js_typed_array_set_internal(JSContext *ctx,
             goto detached;
 
         src_len = src_p->u.array.count;
-        if (offset > (int64_t)(p->u.array.count - src_len))
+        if (offset > (sint64_t)(p->u.array.count - src_len))
             goto range_error;
 
         /* copying between typed objects */
@@ -50123,7 +50123,7 @@ static JSValue js_typed_array_set_internal(JSContext *ctx,
     } else {
         if (js_get_length64(ctx, &src_len, src_obj))
             goto fail;
-        if (offset > (int64_t)(p->u.array.count - src_len)) {
+        if (offset > (sint64_t)(p->u.array.count - src_len)) {
         range_error:
             JS_ThrowRangeError(ctx, "invalid array length");
             goto fail;
@@ -50208,7 +50208,7 @@ static JSValue js_typed_array_create(JSContext *ctx, JSValueConst ctor,
 {
     JSValue ret;
     int new_len;
-    int64_t len;
+    sint64_t len;
 
     ret = JS_CallConstructor(ctx, ctor, argc, argv);
     if (JS_IsException(ret))
@@ -50275,7 +50275,7 @@ static JSValue js_typed_array_from(JSContext *ctx, JSValueConst this_val,
     JSValueConst args[2];
     JSValue stack[2];
     JSValue iter, arr, r, v, v2;
-    int64_t k, len;
+    sint64_t k, len;
     int done, mapping;
 
     mapping = FALSE;
@@ -50567,7 +50567,7 @@ static JSValue js_typed_array_indexOf(JSContext *ctx, JSValueConst this_val,
 {
     JSObject *p;
     int len, tag, is_int, is_bigint, k, stop, inc, res = -1;
-    int64_t v64;
+    sint64_t v64;
     double d;
     float f;
 
@@ -51449,7 +51449,7 @@ static JSValue js_typed_array_constructor_obj(JSContext *ctx,
     JSValue iter, ret, arr = JS_UNDEFINED, val, buffer;
     uint32_t i;
     int size_log2;
-    int64_t len;
+    sint64_t len;
 
     size_log2 = typed_array_size_log2(classid);
     ret = js_create_from_ctor(ctx, new_target, classid);
@@ -52259,10 +52259,10 @@ static JSValue js_atomics_wait(JSContext *ctx,
                                JSValueConst this_obj,
                                int argc, JSValueConst *argv)
 {
-    int64_t v;
+    sint64_t v;
     int32_t v32;
     void *ptr;
-    int64_t timeout;
+    sint64_t timeout;
     struct timespec ts;
     JSAtomicsWaiter waiter_s, *waiter;
     int ret, size_log2, res;
@@ -52289,7 +52289,7 @@ static JSValue js_atomics_wait(JSContext *ctx,
     else if (d < 0)
         timeout = 0;
     else
-        timeout = (int64_t)d;
+        timeout = (sint64_t)d;
     if (!ctx->rt->can_block)
         return JS_ThrowTypeError(ctx, "cannot block in this thread");
 
@@ -52298,7 +52298,7 @@ static JSValue js_atomics_wait(JSContext *ctx,
     /* XXX: use Linux futexes when available ? */
     pthread_mutex_lock(&js_atomics_mutex);
     if (size_log2 == 3) {
-        res = *(int64_t *)ptr != v;
+        res = *(sint64_t *)ptr != v;
     } else {
         res = *(int32_t *)ptr != v;
     }

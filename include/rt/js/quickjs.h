@@ -27,6 +27,13 @@
 
 #include <nautilus/libccompat.h>
 
+
+//TODO: consider replacing references to these types instead
+#define int8_t  sint8_t
+#define int16_t sint16_t
+#define int32_t sint32_t
+#define int64_t sint64_t
+
 #ifdef __cplusplus
 extern "C" {
 #endif
