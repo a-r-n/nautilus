@@ -26,8 +26,6 @@
 #define CONFIG_VERSION "NAUT_0" //TODO
 
 
-
-#include <rt/js/cutils.h>
 #include <rt/js/list.h>
 #include <rt/js/quickjs.h>
 #include <rt/js/libregexp.h>
@@ -35,6 +33,7 @@
 #ifdef CONFIG_BIGNUM
 #include "libbf.h"
 #endif
+
 
 #define OPTIMIZE         1
 #define SHORT_OPCODES    1

@@ -27,6 +27,7 @@
 
 #include <nautilus/libccompat.h>
 #include <nautilus/naut_types.h>
+#include <rt/js/quickjs.h>
 
 /* set if CPU is big endian */
 #undef WORDS_BIGENDIAN

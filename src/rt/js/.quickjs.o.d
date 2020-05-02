@@ -1,7 +1,7 @@
-quickjs.o: src/rt/js/quickjs.c include/autoconf.h include/rt/js/cutils.h \
- include/nautilus/libccompat.h include/nautilus/nautilus.h \
- include/nautilus/percpu.h \
+quickjs.o: src/rt/js/quickjs.c include/autoconf.h include/rt/js/list.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include/stddef.h \
+ include/rt/js/quickjs.h include/nautilus/libccompat.h \
+ include/nautilus/nautilus.h include/nautilus/percpu.h \
  include/nautilus/msr.h include/nautilus/naut_types.h \
  include/nautilus/smp.h include/dev/apic.h include/nautilus/spinlock.h \
  include/nautilus/intrinsics.h include/nautilus/atomic.h \
@@ -17,13 +17,12 @@ quickjs.o: src/rt/js/quickjs.c include/autoconf.h include/rt/js/cutils.h \
  include/nautilus/scheduler.h include/nautilus/vc.h include/dev/ps2.h \
  include/dev/ioapic.h include/nautilus/paging.h include/nautilus/limits.h \
  include/nautilus/naut_assert.h include/nautilus/barrier.h \
- include/nautilus/numa.h include/arch/x64/main.h include/rt/js/list.h \
- include/rt/js/quickjs.h include/rt/js/libregexp.h \
- include/rt/js/libunicode.h /usr/include/inttypes.h \
- /usr/include/features.h /usr/include/stdc-predef.h \
- /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
- /usr/include/bits/long-double.h /usr/include/gnu/stubs.h \
- /usr/include/gnu/stubs-64.h \
+ include/nautilus/numa.h include/arch/x64/main.h \
+ include/rt/js/libregexp.h include/rt/js/libunicode.h \
+ /usr/include/inttypes.h /usr/include/features.h \
+ /usr/include/stdc-predef.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/bits/long-double.h \
+ /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include/stdint.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include/stdint-gcc.h \
  /usr/include/pthread.h /usr/include/sched.h /usr/include/bits/types.h \

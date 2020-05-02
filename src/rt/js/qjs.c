@@ -28,8 +28,14 @@
 #include <nautilus/mm.h>
 #include <nautilus/libccompat.h>
 
+#include <assert.h> //I think this is fine to be in the kernel
+
 #include <rt/js/quickjs-libc.h>
-#include <rt/js/cutils.h>
+//#include <rt/js/cutils.h> // conflicts with un/likely def in include/intrinsics.h
+// still need this from it tho:
+int has_suffix(const char *str, const char *suffix);
+
+
 
 extern const uint8_t qjsc_repl[];
 extern const uint32_t qjsc_repl_size;
