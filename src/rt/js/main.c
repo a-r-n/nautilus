@@ -3,7 +3,7 @@
 
 
 static int entry(char* buf, void* priv) {
-    printf("TEST\n");
+    printk("TEST\n");
     return 0;
 }
 

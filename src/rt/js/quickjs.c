@@ -29,6 +29,8 @@
 #include <rt/js/list.h>
 #include <rt/js/quickjs.h>
 #include <rt/js/libregexp.h>
+#include <rt/js/cutils.h>
+
 
 #ifdef CONFIG_BIGNUM
 #include "libbf.h"
@@ -91,9 +93,12 @@
 //#define FORCE_GC_AT_MALLOC
 
 #ifdef CONFIG_ATOMICS
-#include <pthread.h>
-#include <stdatomic.h>
-#include <errno.h>
+//#include <pthread.h>
+//#include <nautilus/thread.h>
+// OR #include <rt/ndpc/ndp_preempt_threads.h>
+
+//#include <stdatomic.h>
+//#include <errno.h>
 #endif
 
 enum {

@@ -26,14 +26,14 @@
 #include <stdarg.h> //looks like this uses compiler built-ins
 
 #include <nautilus/mm.h>
-#include <nautilus/libccompat.h>
+//#include <nautilus/libccompat.h>
 
 #include <assert.h> //I think this is fine to be in the kernel
 
 #include <rt/js/quickjs-libc.h>
+//#include <rt/js/config.h>
 //#include <rt/js/cutils.h> // conflicts with un/likely def in include/intrinsics.h
 // still need this from it tho:
-int has_suffix(const char *str, const char *suffix);
 
 
 
