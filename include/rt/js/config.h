@@ -26,9 +26,9 @@
 #define int64_t sint64_t
 
 
-#define NAN {0.0/0.0}
-#define INIFNITY {1.0 /0.0}
-#define NEG_INF {-1.0/0.0}
+#define NAN 0.0/0.0
+#define INIFNITY 1.0 /0.0
+#define NEG_INF -1.0/0.0
 
 
 //typedef _Bool BOOL;
