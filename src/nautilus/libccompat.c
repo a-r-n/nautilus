@@ -778,11 +778,31 @@ double acos(double x)
 {
 return x;
 }
+double asinh(double x)
+{
+return x;
+}
+double acosh(double x)
+{
+return x;
+}
+double atanh(double x)
+{
+return x;
+}
 double ceil(double x)
 {
 return x;
 }
 double floor(double x)
+{
+return x;
+}
+double trunc(double x)
+{
+return x;
+}
+double expm1(double x)
 {
 return x;
 }

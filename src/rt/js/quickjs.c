@@ -25,6 +25,7 @@
 
 #define CONFIG_VERSION "NAUT_0" //TODO
 
+#include <nautilus/thread.h>
 
 #include <rt/js/list.h>
 #include <rt/js/quickjs.h>
@@ -40456,9 +40457,12 @@ static uint64_t xorshift64star(uint64_t *pstate)
 
 static void js_random_init(JSContext *ctx)
 {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    ctx->random_state = ((sint64_t)tv.tv_sec * 1000000) + tv.tv_usec;
+    // ORIGINAL CODE:
+    // struct timeval tv;
+    // gettimeofday(&tv, NULL);
+    // ctx->random_state = ((sint64_t)tv.tv_sec * 1000000) + tv.tv_usec;
+    // END ORIGINAL CODE
+    ctx->random_state = __rdtsc();
     /* the state must be non zero */
     if (ctx->random_state == 0)
         ctx->random_state = 1;
@@ -40476,6 +40480,7 @@ static JSValue js_math_random(JSContext *ctx, JSValueConst this_val,
     return __JS_NewFloat64(ctx, u.d - 1.0);
 }
 
+//TODO: most of these are not actually implemented in Nautilus
 static const JSCFunctionListEntry js_math_funcs[] = {
     JS_CFUNC_MAGIC_DEF("min", 2, js_math_min_max, 0 ),
     JS_CFUNC_MAGIC_DEF("max", 2, js_math_min_max, 1 ),
@@ -40548,48 +40553,51 @@ static JSValue js___date_now(JSContext *ctx, JSValueConst this_val,
 static JSValue js___date_clock(JSContext *ctx, JSValueConst this_val,
                                int argc, JSValueConst *argv)
 {
-    sint64_t d;
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    d = (sint64_t)tv.tv_sec * 1000000 + tv.tv_usec;
+    // TODO
+    // sint64_t d;
+    // struct timeval tv;
+    // gettimeofday(&tv, NULL);
+    // d = (sint64_t)tv.tv_sec * 1000000 + tv.tv_usec;
+    sint64_t d = 0;
     return JS_NewInt64(ctx, d);
 }
 
 /* OS dependent. d = argv[0] is in ms from 1970. Return the difference
    between local time and UTC time 'd' in minutes */
 static int getTimezoneOffset(int64_t time) {
-#if defined(_WIN32)
-    /* XXX: TODO */
-    return 0;
-#else
-    time_t ti;
-    struct tm tm;
+// #if defined(_WIN32)
+//     /* XXX: TODO */
+//     return 0;
+// #else TODO
+//     time_t ti;
+//     struct tm tm;
 
-    time /= 1000; /* convert to seconds */
-    if (sizeof(time_t) == 4) {
-        /* on 32-bit systems, we need to clamp the time value to the
-           range of `time_t`. This is better than truncating values to
-           32 bits and hopefully provides the same result as 64-bit
-           implementation of localtime_r.
-         */
-        if ((time_t)-1 < 0) {
-            if (time < INT32_MIN) {
-                time = INT32_MIN;
-            } else if (time > INT32_MAX) {
-                time = INT32_MAX;
-            }
-        } else {
-            if (time < 0) {
-                time = 0;
-            } else if (time > UINT32_MAX) {
-                time = UINT32_MAX;
-            }
-        }
-    }
-    ti = time;
-    localtime_r(&ti, &tm);
-    return -tm.tm_gmtoff / 60;
-#endif
+//     time /= 1000; /* convert to seconds */
+//     if (sizeof(time_t) == 4) {
+//         /* on 32-bit systems, we need to clamp the time value to the
+//            range of `time_t`. This is better than truncating values to
+//            32 bits and hopefully provides the same result as 64-bit
+//            implementation of localtime_r.
+//          */
+//         if ((time_t)-1 < 0) {
+//             if (time < INT32_MIN) {
+//                 time = INT32_MIN;
+//             } else if (time > INT32_MAX) {
+//                 time = INT32_MAX;
+//             }
+//         } else {
+//             if (time < 0) {
+//                 time = 0;
+//             } else if (time > UINT32_MAX) {
+//                 time = UINT32_MAX;
+//             }
+//         }
+//     }
+//     ti = time;
+//     localtime_r(&ti, &tm);
+//     return -tm.tm_gmtoff / 60;
+// #endif
+    return 0;
 }
 
 #if 0
@@ -46759,10 +46767,12 @@ static JSValue get_date_string(JSContext *ctx, JSValueConst this_val,
 }
 
 /* OS dependent: return the UTC time in ms since 1970. */
+//TODO
 static sint64_t date_now(void) {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (sint64_t)tv.tv_sec * 1000 + (tv.tv_usec / 1000);
+    // struct timeval tv;
+    // gettimeofday(&tv, NULL);
+    // return (sint64_t)tv.tv_sec * 1000 + (tv.tv_usec / 1000);
+    return 0;
 }
 
 static JSValue js_date_constructor(JSContext *ctx, JSValueConst new_target,

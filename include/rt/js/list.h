@@ -28,9 +28,9 @@
 #include <stddef.h>
 #endif
 
-struct list_head {
-    struct list_head *prev;
-    struct list_head *next;
+struct jsrt_list_head {
+    struct jsrt_list_head *prev;
+    struct jsrt_list_head *next;
 };
 
 #define LIST_HEAD_INIT(el) { &(el), &(el) }
@@ -39,15 +39,15 @@ struct list_head {
 #define list_entry(el, type, member) \
     ((type *)((uint8_t *)(el) - offsetof(type, member)))
 
-static inline void init_list_head(struct list_head *head)
+static inline void init_list_head(struct jsrt_list_head *head)
 {
     head->prev = head;
     head->next = head;
 }
 
 /* insert 'el' between 'prev' and 'next' */
-static inline void __list_add(struct list_head *el, 
-                              struct list_head *prev, struct list_head *next)
+static inline void __list_add(struct jsrt_list_head *el, 
+                              struct jsrt_list_head *prev, struct jsrt_list_head *next)
 {
     prev->next = el;
     el->prev = prev;
@@ -56,20 +56,20 @@ static inline void __list_add(struct list_head *el,
 }
 
 /* add 'el' at the head of the list 'head' (= after element head) */
-static inline void list_add(struct list_head *el, struct list_head *head)
+static inline void list_add(struct jsrt_list_head *el, struct jsrt_list_head *head)
 {
     __list_add(el, head, head->next);
 }
 
 /* add 'el' at the end of the list 'head' (= before element head) */
-static inline void list_add_tail(struct list_head *el, struct list_head *head)
+static inline void list_add_tail(struct jsrt_list_head *el, struct jsrt_list_head *head)
 {
     __list_add(el, head->prev, head);
 }
 
-static inline void list_del(struct list_head *el)
+static inline void list_del(struct jsrt_list_head *el)
 {
-    struct list_head *prev, *next;
+    struct jsrt_list_head *prev, *next;
     prev = el->prev;
     next = el->next;
     prev->next = next;
@@ -78,7 +78,7 @@ static inline void list_del(struct list_head *el)
     el->next = NULL; /* fail safe */
 }
 
-static inline int list_empty(struct list_head *el)
+static inline int list_empty(struct jsrt_list_head *el)
 {
     return el->next == el;
 }

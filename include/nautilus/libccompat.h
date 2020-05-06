@@ -229,6 +229,8 @@ struct tm {
 
 #define GEN_HDR(x) int x ();
 
+#define PI 3.14159265
+
 // Structures.
 
 struct lconv *localeconv(void);
@@ -269,8 +271,13 @@ double tan(double x);
 double tanh(double x);
 double asin(double x);
 double acos(double x);
+double asinh(double x);
+double acosh(double x);
+double atanh(double x);
+double expm1(double x);
 double ceil(double x);
 double floor(double x);
+double trunc(double x);
 double sqrt(double x);
 double pow(double x, double y);
 double log(double x);

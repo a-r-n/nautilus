@@ -27,8 +27,17 @@
 
 
 #define NAN 0.0/0.0
-#define INIFNITY 1.0 /0.0
+#define INFINITY 1.0 /0.0
 #define NEG_INF -1.0/0.0
+
+// Floating point environment compilation patch
+// TODO: it is very likely we need to better implement this
+#define FE_TONEAREST 0
+#define FE_DOWNWARD 0
+#define FE_UPWARD 0
+
+// Threading compilation patch. This is a TODO
+#define ETIMEDOUT 1
 
 
 //typedef _Bool BOOL;

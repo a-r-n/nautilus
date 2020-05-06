@@ -1,7 +1,7 @@
 /*
  * Automatically generated C config: don't edit
  * Nautilus version: 
- * Mon May  4 11:04:25 2020
+ * Wed May  6 16:02:56 2020
  */
 #define AUTOCONF_INCLUDED
 
@@ -20,7 +20,7 @@
  * Build
  */
 #define NAUT_CONFIG_USE_NAUT_BUILTINS 1
-#define NAUT_CONFIG_CXX_SUPPORT 1
+#undef NAUT_CONFIG_CXX_SUPPORT
 #undef NAUT_CONFIG_RUST_SUPPORT
 #define NAUT_CONFIG_USE_GCC 1
 #undef NAUT_CONFIG_USE_CLANG
@@ -113,8 +113,6 @@
 /*
  * Runtimes
  */
-#undef NAUT_CONFIG_LEGION_RT
-#undef NAUT_CONFIG_NDPC_RT
 #undef NAUT_CONFIG_NESL_RT
 #undef NAUT_CONFIG_OPENMP_RT
 #undef NAUT_CONFIG_RACKET_RT
