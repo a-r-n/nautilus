@@ -32,6 +32,9 @@
 #include <rt/js/libregexp.h>
 #include <rt/js/cutils.h>
 
+// bc fnction malloc_usable_size is missing:
+#include <nautilus/mm.h>
+
 
 #ifdef CONFIG_BIGNUM
 #include "libbf.h"

@@ -67,7 +67,7 @@ static inline void jsrt_list_add_tail(struct jsrt_list_head *el, struct jsrt_lis
     __jsrt_list_add(el, head->prev, head);
 }
 
-static inline void jsrt_list_empty(struct jsrt_list_head *el)
+static inline void jsrt_list_del(struct jsrt_list_head *el)
 {
     struct jsrt_list_head *prev, *next;
     prev = el->prev;
