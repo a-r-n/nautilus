@@ -46,7 +46,7 @@ static inline void init_list_head(struct jsrt_list_head *head)
 }
 
 /* insert 'el' between 'prev' and 'next' */
-static inline void __list_add(struct jsrt_list_head *el, 
+static inline void __jsrt_list_add(struct jsrt_list_head *el, 
                               struct jsrt_list_head *prev, struct jsrt_list_head *next)
 {
     prev->next = el;
@@ -56,18 +56,18 @@ static inline void __list_add(struct jsrt_list_head *el,
 }
 
 /* add 'el' at the head of the list 'head' (= after element head) */
-static inline void list_add(struct jsrt_list_head *el, struct jsrt_list_head *head)
+static inline void jsrt_list_add(struct jsrt_list_head *el, struct jsrt_list_head *head)
 {
-    __list_add(el, head, head->next);
+    __jsrt_list_add(el, head, head->next);
 }
 
 /* add 'el' at the end of the list 'head' (= before element head) */
-static inline void list_add_tail(struct jsrt_list_head *el, struct jsrt_list_head *head)
+static inline void jsrt_list_add_tail(struct jsrt_list_head *el, struct jsrt_list_head *head)
 {
-    __list_add(el, head->prev, head);
+    __jsrt_list_add(el, head->prev, head);
 }
 
-static inline void list_del(struct jsrt_list_head *el)
+static inline void jsrt_list_empty(struct jsrt_list_head *el)
 {
     struct jsrt_list_head *prev, *next;
     prev = el->prev;
@@ -78,7 +78,7 @@ static inline void list_del(struct jsrt_list_head *el)
     el->next = NULL; /* fail safe */
 }
 
-static inline int list_empty(struct jsrt_list_head *el)
+static inline int jsrt_list_empty(struct jsrt_list_head *el)
 {
     return el->next == el;
 }

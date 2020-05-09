@@ -20,10 +20,17 @@
 #define putc _putc
 
 //TODO: consider replacing references to these types instead
-#define int8_t  sint8_t
+//#define int8_t  sint8_t
 #define int16_t sint16_t
 #define int32_t sint32_t
 #define int64_t sint64_t
+
+
+// bc missing pthread std lib
+#define pthread_cond_t unsigned
+#define pthread_mutex_t spinlock_t
+#define PTHREAD_MUTEX_INITIALIZER SPINLOCK_INITIALIZER
+
 
 
 #define NAN 0.0/0.0

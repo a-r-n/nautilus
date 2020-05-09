@@ -1741,13 +1741,13 @@ int JS_EnqueueJob(JSContext *ctx, JSJobFunc *job_func,
     for(i = 0; i < argc; i++) {
         e->argv[i] = JS_DupValue(ctx, argv[i]);
     }
-    list_add_tail(&e->link, &rt->job_list);
+    jsrt_list_add_tail(&e->link, &rt->job_list);
     return 0;
 }
 
 BOOL JS_IsJobPending(JSRuntime *rt)
 {
-    return !list_empty(&rt->job_list);
+    return !jsrt_list_empty(&rt->job_list);
 }
 
 /* return < 0 if exception, 0 if no job pending, 1 if a job was
@@ -1759,14 +1759,14 @@ int JS_ExecutePendingJob(JSRuntime *rt, JSContext **pctx)
     JSValue res;
     int i, ret;
 
-    if (list_empty(&rt->job_list)) {
+    if (jsrt_list_empty(&rt->job_list)) {
         *pctx = NULL;
         return 0;
     }
 
     /* get the first pending job and execute it */
     e = list_entry(rt->job_list.next, JSJobEntry, link);
-    list_del(&e->link);
+    jsrt_list_del(&e->link);
     ctx = e->ctx;
     res = e->job_func(e->ctx, e->argc, (JSValueConst *)e->argv);
     for(i = 0; i < e->argc; i++)
@@ -1810,7 +1810,7 @@ static JSString *js_alloc_string_rt(JSRuntime *rt, int max_len, int is_wide_char
     str->hash = 0;          /* optional but costless */
     str->hash_next = 0;     /* optional */
 #ifdef DUMP_LEAKS
-    list_add_tail(&str->link, &rt->string_list);
+    jsrt_list_add_tail(&str->link, &rt->string_list);
 #endif
     return str;
 }
@@ -1834,7 +1834,7 @@ static inline void js_free_string(JSRuntime *rt, JSString *str)
             JS_FreeAtomStruct(rt, str);
         } else {
 #ifdef DUMP_LEAKS
-            list_del(&str->link);
+            jsrt_list_del(&str->link);
 #endif
             js_free_rt(rt, str);
         }
@@ -1903,7 +1903,7 @@ void JS_FreeRuntime(JSRuntime *rt)
             printf("Secondary object leaks: %d\n", count);
     }
 #endif
-    assert(list_empty(&rt->gc_obj_list));
+    assert(jsrt_list_empty(&rt->gc_obj_list));
 
     /* free the classes */
     for(i = 0; i < rt->class_count; i++) {
@@ -1981,7 +1981,7 @@ void JS_FreeRuntime(JSRuntime *rt)
         JSAtomStruct *p = rt->atom_array[i];
         if (!atom_is_free(p)) {
 #ifdef DUMP_LEAKS
-            list_del(&p->link);
+            jsrt_list_del(&p->link);
 #endif
             js_free_rt(rt, p);
         }
@@ -1990,7 +1990,7 @@ void JS_FreeRuntime(JSRuntime *rt)
     js_free_rt(rt, rt->atom_hash);
     js_free_rt(rt, rt->shape_hash);
 #ifdef DUMP_LEAKS
-    if (!list_empty(&rt->string_list)) {
+    if (!jsrt_list_empty(&rt->string_list)) {
         if (rt->rt_info) {
             printf("%s:1: string leakage:", rt->rt_info);
         } else {
@@ -2011,7 +2011,7 @@ void JS_FreeRuntime(JSRuntime *rt)
             } else {
                 printf("\n");
             }
-            list_del(&str->link);
+            jsrt_list_del(&str->link);
             js_free_rt(rt, str);
         }
         if (rt->rt_info)
@@ -2053,7 +2053,7 @@ JSContext *JS_NewContextRaw(JSRuntime *rt)
         return NULL;
     }
     ctx->rt = rt;
-    list_add_tail(&ctx->link, &rt->context_list);
+    jsrt_list_add_tail(&ctx->link, &rt->context_list);
 #ifdef CONFIG_BIGNUM
     ctx->bf_ctx = &rt->bf_ctx;
     ctx->fp_env.prec = 113;
@@ -2255,7 +2255,7 @@ void JS_FreeContext(JSContext *ctx)
 
     js_free_shape_null(ctx->rt, ctx->array_shape);
 
-    list_del(&ctx->link);
+    jsrt_list_del(&ctx->link);
     remove_gc_object(&ctx->header);
     js_free_rt(ctx->rt, ctx);
 }
@@ -2669,7 +2669,7 @@ static JSAtom __JS_NewAtom(JSRuntime *rt, JSString *str, int atom_type)
             p->header.ref_count = 1;  /* not refcounted */
             p->atom_type = JS_ATOM_TYPE_SYMBOL;
 #ifdef DUMP_LEAKS
-            list_add_tail(&p->link, &rt->string_list);
+            jsrt_list_add_tail(&p->link, &rt->string_list);
 #endif
             new_array[0] = p;
             rt->atom_count++;
@@ -2702,7 +2702,7 @@ static JSAtom __JS_NewAtom(JSRuntime *rt, JSString *str, int atom_type)
             p->is_wide_char = str->is_wide_char;
             p->len = str->len;
 #ifdef DUMP_LEAKS
-            list_add_tail(&p->link, &rt->string_list);
+            jsrt_list_add_tail(&p->link, &rt->string_list);
 #endif
             memcpy(p->u.str8, str->u.str8, (str->len << str->is_wide_char) +
                    1 - str->is_wide_char);
@@ -2716,7 +2716,7 @@ static JSAtom __JS_NewAtom(JSRuntime *rt, JSString *str, int atom_type)
         p->is_wide_char = 1;    /* Hack to represent NULL as a JSString */
         p->len = 0;
 #ifdef DUMP_LEAKS
-        list_add_tail(&p->link, &rt->string_list);
+        jsrt_list_add_tail(&p->link, &rt->string_list);
 #endif
     }
 
@@ -2824,7 +2824,7 @@ static void JS_FreeAtomStruct(JSRuntime *rt, JSAtomStruct *p)
     rt->atom_free_index = i;
     /* free the string structure */
 #ifdef DUMP_LEAKS
-    list_del(&p->link);
+    jsrt_list_del(&p->link);
 #endif
     js_free_rt(rt, p);
     rt->atom_count--;
@@ -3454,7 +3454,7 @@ static int string_buffer_init2(JSContext *ctx, StringBuffer *s, int size,
     }
 #ifdef DUMP_LEAKS
     /* the StringBuffer may reallocate the JSString, only link it at the end */
-    list_del(&s->str->link);
+    jsrt_list_del(&s->str->link);
 #endif
     return 0;
 }
@@ -3758,7 +3758,7 @@ static JSValue string_buffer_end(StringBuffer *s)
     if (!s->is_wide_char)
         str->u.str8[s->len] = 0;
 #ifdef DUMP_LEAKS
-    list_add_tail(&str->link, &s->ctx->rt->string_list);
+    jsrt_list_add_tail(&str->link, &s->ctx->rt->string_list);
 #endif
     str->is_wide_char = s->is_wide_char;
     str->len = s->len;
@@ -4375,11 +4375,11 @@ static no_inline int resize_properties(JSContext *ctx, JSShape **psh,
         if (!sh_alloc)
             return -1;
         sh = get_shape_from_alloc(sh_alloc, new_hash_size);
-        list_del(&old_sh->header.link);
+        jsrt_list_del(&old_sh->header.link);
         /* copy all the fields and the properties */
         memcpy(sh, old_sh,
                sizeof(JSShape) + sizeof(sh->prop[0]) * old_sh->prop_count);
-        list_add_tail(&sh->header.link, &ctx->rt->gc_obj_list);
+        jsrt_list_add_tail(&sh->header.link, &ctx->rt->gc_obj_list);
         new_hash_mask = new_hash_size - 1;
         sh->prop_hash_mask = new_hash_mask;
         memset(sh->prop_hash_end - new_hash_size, 0,
@@ -4394,16 +4394,16 @@ static no_inline int resize_properties(JSContext *ctx, JSShape **psh,
         js_free(ctx, get_alloc_from_shape(old_sh));
     } else {
         /* only resize the properties */
-        list_del(&sh->header.link);
+        jsrt_list_del(&sh->header.link);
         sh_alloc = js_realloc(ctx, get_alloc_from_shape(sh),
                               get_shape_size(new_hash_size, new_size));
         if (unlikely(!sh_alloc)) {
             /* insert again in the GC list */
-            list_add_tail(&sh->header.link, &ctx->rt->gc_obj_list);
+            jsrt_list_add_tail(&sh->header.link, &ctx->rt->gc_obj_list);
             return -1;
         }
         sh = get_shape_from_alloc(sh_alloc, new_hash_size);
-        list_add_tail(&sh->header.link, &ctx->rt->gc_obj_list);
+        jsrt_list_add_tail(&sh->header.link, &ctx->rt->gc_obj_list);
     }
     *psh = sh;
     sh->prop_size = new_size;
@@ -5053,7 +5053,7 @@ static void free_var_ref(JSRuntime *rt, JSVarRef *var_ref)
                 JS_FreeValueRT(rt, var_ref->value);
                 remove_gc_object(&var_ref->header);
             } else {
-                list_del(&var_ref->header.link); /* still on the stack */
+                jsrt_list_del(&var_ref->header.link); /* still on the stack */
             }
             js_free_rt(rt, var_ref);
         }
@@ -5247,7 +5247,7 @@ static void free_object(JSRuntime *rt, JSObject *p)
 
     remove_gc_object(&p->header);
     if (rt->gc_phase == JS_GC_PHASE_REMOVE_CYCLES && p->header.ref_count != 0) {
-        list_add_tail(&p->header.link, &rt->gc_zero_ref_count_list);
+        jsrt_list_add_tail(&p->header.link, &rt->gc_zero_ref_count_list);
     } else {
         js_free_rt(rt, p);
     }
@@ -5309,7 +5309,7 @@ void __JS_FreeValueRT(JSRuntime *rt, JSValue v)
                 JS_FreeAtomStruct(rt, p);
             } else {
 #ifdef DUMP_LEAKS
-                list_del(&p->link);
+                jsrt_list_del(&p->link);
 #endif
                 js_free_rt(rt, p);
             }
@@ -5320,8 +5320,8 @@ void __JS_FreeValueRT(JSRuntime *rt, JSValue v)
         {
             JSGCObjectHeader *p = JS_VALUE_GET_PTR(v);
             if (rt->gc_phase != JS_GC_PHASE_REMOVE_CYCLES) {
-                list_del(&p->link);
-                list_add(&p->link, &rt->gc_zero_ref_count_list);
+                jsrt_list_del(&p->link);
+                jsrt_list_add(&p->link, &rt->gc_zero_ref_count_list);
                 if (rt->gc_phase == JS_GC_PHASE_NONE) {
                     free_zero_refcount(rt);
                 }
@@ -5372,12 +5372,12 @@ static void add_gc_object(JSRuntime *rt, JSGCObjectHeader *h,
 {
     h->mark = 0;
     h->gc_obj_type = type;
-    list_add_tail(&h->link, &rt->gc_obj_list);
+    jsrt_list_add_tail(&h->link, &rt->gc_obj_list);
 }
 
 static void remove_gc_object(JSGCObjectHeader *h)
 {
-    list_del(&h->link);
+    jsrt_list_del(&h->link);
 }
 
 void JS_MarkValue(JSRuntime *rt, JSValueConst val, JS_MarkFunc *mark_func)
@@ -5494,8 +5494,8 @@ static void gc_decref_child(JSRuntime *rt, JSGCObjectHeader *p)
     assert(p->ref_count > 0);
     p->ref_count--;
     if (p->ref_count == 0 && p->mark == 1) {
-        list_del(&p->link);
-        list_add_tail(&p->link, &rt->tmp_obj_list);
+        jsrt_list_del(&p->link);
+        jsrt_list_add_tail(&p->link, &rt->tmp_obj_list);
     }
 }
 
@@ -5515,8 +5515,8 @@ static void gc_decref(JSRuntime *rt)
         mark_children(rt, p, gc_decref_child);
         p->mark = 1;
         if (p->ref_count == 0) {
-            list_del(&p->link);
-            list_add_tail(&p->link, &rt->tmp_obj_list);
+            jsrt_list_del(&p->link);
+            jsrt_list_add_tail(&p->link, &rt->tmp_obj_list);
         }
     }
 }
@@ -5527,8 +5527,8 @@ static void gc_scan_incref_child(JSRuntime *rt, JSGCObjectHeader *p)
     if (p->ref_count == 1) {
         /* ref_count was 0: remove from tmp_obj_list and add at the
            end of gc_obj_list */
-        list_del(&p->link);
-        list_add_tail(&p->link, &rt->gc_obj_list);
+        jsrt_list_del(&p->link);
+        jsrt_list_add_tail(&p->link, &rt->gc_obj_list);
         p->mark = 0; /* reset the mark for the next GC call */
     }
 }
@@ -5590,8 +5590,8 @@ static void gc_free_cycles(JSRuntime *rt)
             free_gc_object(rt, p);
             break;
         default:
-            list_del(&p->link);
-            list_add_tail(&p->link, &rt->gc_zero_ref_count_list);
+            jsrt_list_del(&p->link);
+            jsrt_list_add_tail(&p->link, &rt->gc_zero_ref_count_list);
             break;
         }
     }
@@ -15280,7 +15280,7 @@ static JSVarRef *get_var_ref(JSContext *ctx, JSStackFrame *sf,
     var_ref->is_detached = FALSE;
     var_ref->is_arg = is_arg;
     var_ref->var_idx = var_idx;
-    list_add_tail(&var_ref->header.link, &sf->var_ref_list);
+    jsrt_list_add_tail(&var_ref->header.link, &sf->var_ref_list);
     if (is_arg)
         var_ref->pvalue = &sf->arg_buf[var_idx];
     else
@@ -15538,7 +15538,7 @@ static void close_lexical_var(JSContext *ctx, JSStackFrame *sf, int idx, int is_
         if (var_idx == var_ref->var_idx && var_ref->is_arg == is_arg) {
             var_ref->value = JS_DupValue(ctx, sf->var_buf[var_idx]);
             var_ref->pvalue = &var_ref->value;
-            list_del(&var_ref->header.link);
+            jsrt_list_del(&var_ref->header.link);
             /* the reference is no longer to a local variable */
             var_ref->is_detached = TRUE;
             add_gc_object(ctx->rt, &var_ref->header, JS_GC_OBJ_TYPE_VAR_REF);
@@ -18270,7 +18270,7 @@ static JSValue JS_CallInternal(JSContext *caller_ctx, JSValueConst func_obj,
         sf->cur_sp = sp;
     } else {
     done:
-        if (unlikely(!list_empty(&sf->var_ref_list))) {
+        if (unlikely(!jsrt_list_empty(&sf->var_ref_list))) {
             /* variable references reference the stack: must close them */
             close_var_refs(rt, sf);
         }
@@ -19129,7 +19129,7 @@ static void js_async_generator_resolve_or_reject(JSContext *ctx,
     JSValue ret;
 
     next = list_entry(s->queue.next, JSAsyncGeneratorRequest, link);
-    list_del(&next->link);
+    jsrt_list_del(&next->link);
     ret = JS_Call(ctx, next->resolving_funcs[is_reject], JS_UNDEFINED, 1,
                   &result);
     JS_FreeValue(ctx, ret);
@@ -19204,7 +19204,7 @@ static void js_async_generator_resume_next(JSContext *ctx,
     JSValue func_ret, value;
 
     for(;;) {
-        if (list_empty(&s->queue))
+        if (jsrt_list_empty(&s->queue))
             break;
         next = list_entry(s->queue.next, JSAsyncGeneratorRequest, link);
         switch(s->state) {
@@ -19363,7 +19363,7 @@ static JSValue js_async_generator_next(JSContext *ctx, JSValueConst this_val,
     req->promise = JS_DupValue(ctx, promise);
     req->resolving_funcs[0] = resolving_funcs[0];
     req->resolving_funcs[1] = resolving_funcs[1];
-    list_add_tail(&req->link, &s->queue);
+    jsrt_list_add_tail(&req->link, &s->queue);
     if (s->state != JS_ASYNC_GENERATOR_STATE_EXECUTING) {
         js_async_generator_resume_next(ctx, s);
     }
@@ -26253,7 +26253,7 @@ static JSModuleDef *js_new_module_def(JSContext *ctx, JSAtom name)
     m->func_obj = JS_UNDEFINED;
     m->eval_exception = JS_UNDEFINED;
     m->meta_obj = JS_UNDEFINED;
-    list_add_tail(&m->link, &ctx->loaded_modules);
+    jsrt_list_add_tail(&m->link, &ctx->loaded_modules);
     return m;
 }
 
@@ -26309,7 +26309,7 @@ static void js_free_module_def(JSContext *ctx, JSModuleDef *m)
     JS_FreeValue(ctx, m->func_obj);
     JS_FreeValue(ctx, m->eval_exception);
     JS_FreeValue(ctx, m->meta_obj);
-    list_del(&m->link);
+    jsrt_list_del(&m->link);
     js_free(ctx, m);
 }
 
@@ -27906,7 +27906,7 @@ static JSFunctionDef *js_new_function_def(JSContext *ctx,
     fd->parent = parent;
     fd->parent_cpool_idx = -1;
     if (parent) {
-        list_add_tail(&fd->link, &parent->child_list);
+        jsrt_list_add_tail(&fd->link, &parent->child_list);
         fd->js_mode = parent->js_mode;
         fd->parent_scope_level = parent->scope_level;
     }
@@ -28034,7 +28034,7 @@ static void js_free_function_def(JSContext *ctx, JSFunctionDef *fd)
 
     if (fd->parent) {
         /* remove in parent list */
-        list_del(&fd->link);
+        jsrt_list_del(&fd->link);
     }
     js_free(ctx, fd);
 }
@@ -31755,7 +31755,7 @@ static JSValue js_create_function(JSContext *ctx, JSFunctionDef *fd)
 
     if (fd->parent) {
         /* remove from parent list */
-        list_del(&fd->link);
+        jsrt_list_del(&fd->link);
     }
 
     js_free(ctx, fd);
@@ -31802,7 +31802,7 @@ static void free_function_bytecode(JSRuntime *rt, JSFunctionBytecode *b)
 
     remove_gc_object(&b->header);
     if (rt->gc_phase == JS_GC_PHASE_REMOVE_CYCLES && b->header.ref_count != 0) {
-        list_add_tail(&b->header.link, &rt->gc_zero_ref_count_list);
+        jsrt_list_add_tail(&b->header.link, &rt->gc_zero_ref_count_list);
     } else {
         js_free_rt(rt, b);
     }
@@ -44250,7 +44250,7 @@ static void map_hash_resize(JSContext *ctx, JSMapState *s)
         mr = list_entry(el, JSMapRecord, link);
         if (!mr->empty) {
             h = map_hash_key(ctx, mr->key) & (new_hash_size - 1);
-            list_add_tail(&mr->hash_link, &new_hash_table[h]);
+            jsrt_list_add_tail(&mr->hash_link, &new_hash_table[h]);
         }
     }
     s->hash_table = new_hash_table;
@@ -44280,8 +44280,8 @@ static JSMapRecord *map_add_record(JSContext *ctx, JSMapState *s,
     }
     mr->key = (JSValue)key;
     h = map_hash_key(ctx, key) & (s->hash_size - 1);
-    list_add_tail(&mr->hash_link, &s->hash_table[h]);
-    list_add_tail(&mr->link, &s->records);
+    jsrt_list_add_tail(&mr->hash_link, &s->hash_table[h]);
+    jsrt_list_add_tail(&mr->link, &s->records);
     s->record_count++;
     if (s->record_count >= s->record_count_threshold) {
         map_hash_resize(ctx, s);
@@ -44314,7 +44314,7 @@ static void map_delete_record(JSRuntime *rt, JSMapState *s, JSMapRecord *mr)
 {
     if (mr->empty)
         return;
-    list_del(&mr->hash_link);
+    jsrt_list_del(&mr->hash_link);
     if (s->is_weak) {
         delete_weak_ref(rt, mr);
     } else {
@@ -44322,7 +44322,7 @@ static void map_delete_record(JSRuntime *rt, JSMapState *s, JSMapRecord *mr)
     }
     JS_FreeValueRT(rt, mr->value);
     if (--mr->ref_count == 0) {
-        list_del(&mr->link);
+        jsrt_list_del(&mr->link);
         js_free_rt(rt, mr);
     } else {
         /* keep a zombie record for iterators */
@@ -44338,7 +44338,7 @@ static void map_decref_record(JSRuntime *rt, JSMapRecord *mr)
     if (--mr->ref_count == 0) {
         /* the record can be safely removed */
         assert(mr->empty);
-        list_del(&mr->link);
+        jsrt_list_del(&mr->link);
         js_free_rt(rt, mr);
     }
 }
@@ -44354,8 +44354,8 @@ static void reset_weak_ref(JSRuntime *rt, JSObject *p)
         s = mr->map;
         assert(s->is_weak);
         assert(!mr->empty); /* no iterator on WeakMap/WeakSet */
-        list_del(&mr->hash_link);
-        list_del(&mr->link);
+        jsrt_list_del(&mr->hash_link);
+        jsrt_list_del(&mr->link);
     }
     
     /* second pass to free the values to avoid modifying the weak
@@ -44940,13 +44940,13 @@ static void fulfill_or_reject_promise(JSContext *ctx, JSValueConst promise,
         args[3] = JS_NewBool(ctx, is_reject);
         args[4] = value;
         JS_EnqueueJob(ctx, promise_reaction_job, 5, args);
-        list_del(&rd->link);
+        jsrt_list_del(&rd->link);
         promise_reaction_data_free(ctx->rt, rd);
     }
 
     list_for_each_safe(el, el1, &s->promise_reactions[1 - is_reject]) {
         rd = list_entry(el, JSPromiseReactionData, link);
-        list_del(&rd->link);
+        jsrt_list_del(&rd->link);
         promise_reaction_data_free(ctx->rt, rd);
     }
 }
@@ -45659,7 +45659,7 @@ static __exception int perform_promise_then(JSContext *ctx,
 
     if (s->promise_state == JS_PROMISE_PENDING) {
         for(i = 0; i < 2; i++)
-            list_add_tail(&rd_array[i]->link, &s->promise_reactions[i]);
+            jsrt_list_add_tail(&rd_array[i]->link, &s->promise_reactions[i]);
     } else {
         JSValueConst args[5];
         if (s->promise_state == JS_PROMISE_REJECTED && !s->is_handled) {
@@ -49734,7 +49734,7 @@ static void js_array_buffer_finalizer(JSRuntime *rt, JSValue val)
         /* The ArrayBuffer finalizer may be called before the typed
            array finalizers using it, so abuf->array_list is not
            necessarily empty. */
-        // assert(list_empty(&abuf->array_list));
+        // assert(jsrt_list_empty(&abuf->array_list));
         if (abuf->free_func)
             abuf->free_func(rt, abuf->opaque, abuf->data);
         js_free_rt(rt, abuf);
@@ -51406,7 +51406,7 @@ static int typed_array_init(JSContext *ctx, JSValueConst obj,
     ta->buffer = pbuffer;
     ta->offset = offset;
     ta->length = len << size_log2;
-    list_add_tail(&ta->link, &abuf->array_list);
+    jsrt_list_add_tail(&ta->link, &abuf->array_list);
     p->u.typed_array = ta;
     p->u.array.count = len;
     p->u.array.u.ptr = abuf->data + offset;
@@ -51651,7 +51651,7 @@ static void js_typed_array_finalizer(JSRuntime *rt, JSValue val)
         /* during the GC the finalizers are called in an arbitrary
            order so the ArrayBuffer finalizer may have been called */
         if (JS_IsLiveObject(rt, JS_MKPTR(JS_TAG_OBJECT, ta->buffer))) {
-            list_del(&ta->link);
+            jsrt_list_del(&ta->link);
         }
         JS_FreeValueRT(rt, JS_MKPTR(JS_TAG_OBJECT, ta->buffer));
         js_free_rt(rt, ta);
@@ -51722,7 +51722,7 @@ static JSValue js_dataview_constructor(JSContext *ctx,
     ta->buffer = JS_VALUE_GET_OBJ(JS_DupValue(ctx, buffer));
     ta->offset = offset;
     ta->length = len;
-    list_add_tail(&ta->link, &abuf->array_list);
+    jsrt_list_add_tail(&ta->link, &abuf->array_list);
     p->u.typed_array = ta;
     return obj;
 }
@@ -52325,7 +52325,7 @@ static JSValue js_atomics_wait(JSContext *ctx,
     waiter->ptr = ptr;
     pthread_cond_init(&waiter->cond, NULL);
     waiter->linked = TRUE;
-    list_add_tail(&waiter->link, &js_atomics_waiter_list);
+    jsrt_list_add_tail(&waiter->link, &js_atomics_waiter_list);
 
     if (timeout == INT64_MAX) {
         pthread_cond_wait(&waiter->cond, &js_atomics_mutex);
@@ -52343,7 +52343,7 @@ static JSValue js_atomics_wait(JSContext *ctx,
                                      &ts);
     }
     if (waiter->linked)
-        list_del(&waiter->link);
+        jsrt_list_del(&waiter->link);
     pthread_mutex_unlock(&js_atomics_mutex);
     pthread_cond_destroy(&waiter->cond);
     if (ret == ETIMEDOUT) {
@@ -52380,9 +52380,9 @@ static JSValue js_atomics_notify(JSContext *ctx,
         list_for_each_safe(el, el1, &js_atomics_waiter_list) {
             waiter = list_entry(el, JSAtomicsWaiter, link);
             if (waiter->ptr == ptr) {
-                list_del(&waiter->link);
+                jsrt_list_del(&waiter->link);
                 waiter->linked = FALSE;
-                list_add_tail(&waiter->link, &waiter_list);
+                jsrt_list_add_tail(&waiter->link, &waiter_list);
                 n++;
                 if (n >= count)
                     break;
