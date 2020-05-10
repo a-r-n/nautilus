@@ -25,7 +25,7 @@
 
 #define CONFIG_VERSION "NAUT_0" //TODO
 
-#include <nautilus/thread.h>
+//#include <nautilus/thread.h>
 
 #include <rt/js/list.h>
 #include <rt/js/quickjs.h>
@@ -244,17 +244,17 @@ struct JSRuntime {
     int class_count;    /* size of class_array */
     JSClass *class_array;
 
-    struct list_head context_list; /* list of JSContext.link */
+    struct jsrt_list_head context_list; /* list of JSContext.link */
     /* list of JSGCObjectHeader.link. List of allocated GC objects (used
        by the garbage collector) */
-    struct list_head gc_obj_list;
+    struct jsrt_list_head gc_obj_list;
     /* list of JSGCObjectHeader.link. Used during JS_FreeValueRT() */
-    struct list_head gc_zero_ref_count_list; 
-    struct list_head tmp_obj_list; /* used during GC */
+    struct jsrt_list_head gc_zero_ref_count_list; 
+    struct jsrt_list_head tmp_obj_list; /* used during GC */
     JSGCPhaseEnum gc_phase : 8;
     size_t malloc_gc_threshold;
 #ifdef DUMP_LEAKS
-    struct list_head string_list; /* list of JSString.link */
+    struct jsrt_list_head string_list; /* list of JSString.link */
 #endif
     /* stack limitation */
     const uint8_t *stack_top;
@@ -272,7 +272,7 @@ struct JSRuntime {
     JSHostPromiseRejectionTracker *host_promise_rejection_tracker;
     void *host_promise_rejection_tracker_opaque;
     
-    struct list_head job_list; /* list of JSJobEntry.link */
+    struct jsrt_list_head job_list; /* list of JSJobEntry.link */
 
     JSModuleNormalizeFunc *module_normalize_func;
     JSModuleLoaderFunc *module_loader_func;
@@ -314,7 +314,7 @@ typedef struct JSStackFrame {
     JSValue cur_func; /* current function, JS_UNDEFINED if the frame is detached */
     JSValue *arg_buf; /* arguments */
     JSValue *var_buf; /* variables */
-    struct list_head var_ref_list; /* list of JSVarRef.link */
+    struct jsrt_list_head var_ref_list; /* list of JSVarRef.link */
     const uint8_t *cur_pc; /* only used in bytecode functions : PC of the
                         instruction after the call */
     int arg_count;
@@ -342,7 +342,7 @@ struct JSGCObjectHeader {
     uint8_t mark : 4; /* used by the GC */
     uint8_t dummy1; /* not used by the GC */
     uint16_t dummy2; /* not used by the GC */
-    struct list_head link;
+    struct jsrt_list_head link;
 };
 
 typedef struct JSVarRef {
@@ -400,7 +400,7 @@ typedef enum {
 struct JSContext {
     JSGCObjectHeader header; /* must come first */
     JSRuntime *rt;
-    struct list_head link;
+    struct jsrt_list_head link;
 
     uint16_t binary_object_count;
     int binary_object_size;
@@ -434,7 +434,7 @@ struct JSContext {
     int interrupt_counter;
     BOOL is_error_property_enabled;
 
-    struct list_head loaded_modules; /* list of JSModuleDef.link */
+    struct jsrt_list_head loaded_modules; /* list of JSModuleDef.link */
 
     /* if NULL, RegExp compilation is not supported */
     JSValue (*compile_regexp)(JSContext *ctx, JSValueConst pattern,
@@ -483,7 +483,7 @@ struct JSString {
     uint8_t atom_type : 2; /* != 0 if atom, JS_ATOM_TYPE_x */
     uint32_t hash_next; /* atom_index for JS_ATOM_TYPE_SYMBOL */
 #ifdef DUMP_LEAKS
-    struct list_head link; /* string list */
+    struct jsrt_list_head link; /* string list */
 #endif
     union {
         uint8_t str8[0]; /* 8 bit strings will get an extra null terminator */
@@ -633,13 +633,13 @@ typedef struct JSArrayBuffer {
     uint8_t detached;
     uint8_t shared; /* if shared, the array buffer cannot be detached */
     uint8_t *data; /* NULL if detached */
-    struct list_head array_list;
+    struct jsrt_list_head array_list;
     void *opaque;
     JSFreeArrayBufferDataFunc *free_func;
 } JSArrayBuffer;
 
 typedef struct JSTypedArray {
-    struct list_head link; /* link to arraybuffer */
+    struct jsrt_list_head link; /* link to arraybuffer */
     JSObject *obj; /* back pointer to the TypedArray/DataView object */
     JSObject *buffer; /* based array buffer */
     uint32_t offset; /* offset in the array buffer */
@@ -746,7 +746,7 @@ typedef struct JSImportEntry {
 struct JSModuleDef {
     JSRefCountHeader header; /* must come first, 32-bit */
     JSAtom module_name;
-    struct list_head link;
+    struct jsrt_list_head link;
 
     JSReqModuleEntry *req_module_entries;
     int req_module_entries_count;
@@ -779,7 +779,7 @@ struct JSModuleDef {
 };
 
 typedef struct JSJobEntry {
-    struct list_head link;
+    struct jsrt_list_head link;
     JSContext *ctx;
     JSJobFunc *job_func;
     int argc;
@@ -1852,7 +1852,7 @@ void JS_SetRuntimeInfo(JSRuntime *rt, const char *s)
 
 void JS_FreeRuntime(JSRuntime *rt)
 {
-    struct list_head *el, *el1;
+    struct jsrt_list_head *el, *el1;
     int i;
 
     JS_FreeValueRT(rt, rt->current_exception);
@@ -2140,7 +2140,7 @@ typedef enum JSFreeModuleEnum {
 /* XXX: would be more efficient with separate module lists */
 static void js_free_modules(JSContext *ctx, JSFreeModuleEnum flag)
 {
-    struct list_head *el, *el1;
+    struct jsrt_list_head *el, *el1;
     list_for_each_safe(el, el1, &ctx->loaded_modules) {
         JSModuleDef *m = list_entry(el, JSModuleDef, link);
         if (flag == JS_FREE_MODULE_ALL ||
@@ -2162,7 +2162,7 @@ static void JS_MarkContext(JSRuntime *rt, JSContext *ctx,
                            JS_MarkFunc *mark_func)
 {
     int i;
-    struct list_head *el;
+    struct jsrt_list_head *el;
 
     /* modules are not seen by the GC, so we directly mark the objects
        referenced by each module */
@@ -2213,7 +2213,7 @@ void JS_FreeContext(JSContext *ctx)
 #endif
 #ifdef DUMP_OBJECTS
     {
-        struct list_head *el;
+        struct jsrt_list_head *el;
         JSGCObjectHeader *p;
         printf("JSObjects: {\n");
         JS_DumpObjectHeader(ctx->rt);
@@ -3305,7 +3305,7 @@ static int JS_NewClass1(JSRuntime *rt, JSClassID class_id,
 {
     int new_size, i;
     JSClass *cl, *new_class_array;
-    struct list_head *el;
+    struct jsrt_list_head *el;
 
     if (class_id < rt->class_count &&
         rt->class_array[class_id].class_id != 0)
@@ -4529,7 +4529,7 @@ static __maybe_unused void JS_DumpShapes(JSRuntime *rt)
 {
     int i;
     JSShape *sh;
-    struct list_head *el;
+    struct jsrt_list_head *el;
     JSObject *p;
     JSGCObjectHeader *gp;
     
@@ -5272,7 +5272,7 @@ static void free_gc_object(JSRuntime *rt, JSGCObjectHeader *gp)
 
 static void free_zero_refcount(JSRuntime *rt)
 {
-    struct list_head *el;
+    struct jsrt_list_head *el;
     JSGCObjectHeader *p;
     
     rt->gc_phase = JS_GC_PHASE_DECREF;
@@ -5504,7 +5504,7 @@ static void gc_decref_child(JSRuntime *rt, JSGCObjectHeader *p)
 
 static void gc_decref(JSRuntime *rt)
 {
-    struct list_head *el, *el1;
+    struct jsrt_list_head *el, *el1;
     JSGCObjectHeader *p;
     
     init_list_head(&rt->tmp_obj_list);
@@ -5543,7 +5543,7 @@ static void gc_scan_incref_child2(JSRuntime *rt, JSGCObjectHeader *p)
 
 static void gc_scan(JSRuntime *rt)
 {
-    struct list_head *el;
+    struct jsrt_list_head *el;
     JSGCObjectHeader *p;
 
     /* keep the objects with a refcount > 0 and their children. */
@@ -5563,7 +5563,7 @@ static void gc_scan(JSRuntime *rt)
 
 static void gc_free_cycles(JSRuntime *rt)
 {
-    struct list_head *el, *el1;
+    struct jsrt_list_head *el, *el1;
     JSGCObjectHeader *p;
 #ifdef DUMP_GC_FREE
     BOOL header_done = FALSE;
@@ -5717,7 +5717,7 @@ static void compute_value_size(JSValueConst val, JSMemoryUsage_helper *hp)
 
 void JS_ComputeMemoryUsage(JSRuntime *rt, JSMemoryUsage *s)
 {
-    struct list_head *el, *el1;
+    struct jsrt_list_head *el, *el1;
     int i;
     JSMemoryUsage_helper mem = { 0 }, *hp = &mem;
 
@@ -6045,7 +6045,7 @@ void JS_DumpMemoryUsage(FILE *fp, const JSMemoryUsage *s, JSRuntime *rt)
         {
             int obj_classes[JS_CLASS_INIT_COUNT + 1] = { 0 };
             int class_id;
-            struct list_head *el;
+            struct jsrt_list_head *el;
             list_for_each(el, &rt->gc_obj_list) {
                 JSGCObjectHeader *gp = list_entry(el, JSGCObjectHeader, link);
                 JSObject *p;
@@ -15266,7 +15266,7 @@ static JSVarRef *get_var_ref(JSContext *ctx, JSStackFrame *sf,
                              int var_idx, BOOL is_arg)
 {
     JSVarRef *var_ref;
-    struct list_head *el;
+    struct jsrt_list_head *el;
 
     list_for_each(el, &sf->var_ref_list) {
         var_ref = list_entry(el, JSVarRef, header.link);
@@ -15512,7 +15512,7 @@ static int js_op_define_class(JSContext *ctx, JSValue *sp,
 
 static void close_var_refs(JSRuntime *rt, JSStackFrame *sf)
 {
-    struct list_head *el, *el1;
+    struct jsrt_list_head *el, *el1;
     JSVarRef *var_ref;
     int var_idx;
 
@@ -15532,7 +15532,7 @@ static void close_var_refs(JSRuntime *rt, JSStackFrame *sf)
 
 static void close_lexical_var(JSContext *ctx, JSStackFrame *sf, int idx, int is_arg)
 {
-    struct list_head *el, *el1;
+    struct jsrt_list_head *el, *el1;
     JSVarRef *var_ref;
     int var_idx = idx;
 
@@ -18995,7 +18995,7 @@ typedef enum JSAsyncGeneratorStateEnum {
 } JSAsyncGeneratorStateEnum;
 
 typedef struct JSAsyncGeneratorRequest {
-    struct list_head link;
+    struct jsrt_list_head link;
     /* completion */
     int completion_type; /* GEN_MAGIC_x */
     JSValue result;
@@ -19008,13 +19008,13 @@ typedef struct JSAsyncGeneratorData {
     JSObject *generator; /* back pointer to the object (const) */
     JSAsyncGeneratorStateEnum state;
     JSAsyncFunctionState func_state;
-    struct list_head queue; /* list of JSAsyncGeneratorRequest.link */
+    struct jsrt_list_head queue; /* list of JSAsyncGeneratorRequest.link */
 } JSAsyncGeneratorData;
 
 static void js_async_generator_free(JSRuntime *rt,
                                     JSAsyncGeneratorData *s)
 {
-    struct list_head *el, *el1;
+    struct jsrt_list_head *el, *el1;
     JSAsyncGeneratorRequest *req;
 
     list_for_each_safe(el, el1, &s->queue) {
@@ -19045,7 +19045,7 @@ static void js_async_generator_mark(JSRuntime *rt, JSValueConst val,
                                     JS_MarkFunc *mark_func)
 {
     JSAsyncGeneratorData *s = JS_GetOpaque(val, JS_CLASS_ASYNC_GENERATOR);
-    struct list_head *el;
+    struct jsrt_list_head *el;
     JSAsyncGeneratorRequest *req;
     if (s) {
         list_for_each(el, &s->queue) {
@@ -19597,8 +19597,8 @@ typedef struct JSFunctionDef {
     int parent_cpool_idx; /* index in the constant pool of the parent
                              or -1 if none */
     int parent_scope_level; /* scope level in parent at point of definition */
-    struct list_head child_list; /* list of JSFunctionDef.link */
-    struct list_head link;
+    struct jsrt_list_head child_list; /* list of JSFunctionDef.link */
+    struct jsrt_list_head link;
 
     BOOL is_eval; /* TRUE if eval code */
     int eval_type; /* only valid if is_eval = TRUE */
@@ -26547,7 +26547,7 @@ static char *js_default_module_normalize_name(JSContext *ctx,
 
 static JSModuleDef *js_find_loaded_module(JSContext *ctx, JSAtom name)
 {
-    struct list_head *el;
+    struct jsrt_list_head *el;
     JSModuleDef *m;
     
     /* first look at the loaded modules */
@@ -27984,7 +27984,7 @@ static void free_bytecode_atoms(JSRuntime *rt,
 static void js_free_function_def(JSContext *ctx, JSFunctionDef *fd)
 {
     int i;
-    struct list_head *el, *el1;
+    struct jsrt_list_head *el, *el1;
 
     /* free the child functions */
     list_for_each_safe(el, el1, &fd->child_list) {
@@ -31551,7 +31551,7 @@ static JSValue js_create_function(JSContext *ctx, JSFunctionDef *fd)
 {
     JSValue func_obj;
     JSFunctionBytecode *b;
-    struct list_head *el, *el1;
+    struct jsrt_list_head *el, *el1;
     int stack_size, scope, idx;
     int function_size, byte_code_offset, cpool_offset;
     int closure_var_offset, vardefs_offset;
@@ -44034,17 +44034,17 @@ typedef struct JSMapRecord {
     BOOL empty; /* TRUE if the record is deleted */
     struct JSMapState *map;
     struct JSMapRecord *next_weak_ref;
-    struct list_head link;
-    struct list_head hash_link;
+    struct jsrt_list_head link;
+    struct jsrt_list_head hash_link;
     JSValue key;
     JSValue value;
 } JSMapRecord;
 
 typedef struct JSMapState {
     BOOL is_weak; /* TRUE if WeakSet/WeakMap */
-    struct list_head records; /* list of JSMapRecord.link */
+    struct jsrt_list_head records; /* list of JSMapRecord.link */
     uint32_t record_count;
-    struct list_head *hash_table;
+    struct jsrt_list_head *hash_table;
     uint32_t hash_size; /* must be a power of two */
     uint32_t record_count_threshold; /* count at which a hash table
                                         resize is needed */
@@ -44216,7 +44216,7 @@ static uint32_t map_hash_key(JSContext *ctx, JSValueConst key)
 static JSMapRecord *map_find_record(JSContext *ctx, JSMapState *s,
                                     JSValueConst key)
 {
-    struct list_head *el;
+    struct jsrt_list_head *el;
     JSMapRecord *mr;
     uint32_t h;
     h = map_hash_key(ctx, key) & (s->hash_size - 1);
@@ -44232,7 +44232,7 @@ static void map_hash_resize(JSContext *ctx, JSMapState *s)
 {
     uint32_t new_hash_size, i, h;
     size_t slack;
-    struct list_head *new_hash_table, *el;
+    struct jsrt_list_head *new_hash_table, *el;
     JSMapRecord *mr;
 
     /* XXX: no reporting of memory allocation failure */
@@ -44452,7 +44452,7 @@ static JSValue js_map_clear(JSContext *ctx, JSValueConst this_val,
                             int argc, JSValueConst *argv, int magic)
 {
     JSMapState *s = JS_GetOpaque2(ctx, this_val, JS_CLASS_MAP + magic);
-    struct list_head *el, *el1;
+    struct jsrt_list_head *el, *el1;
     JSMapRecord *mr;
 
     if (!s)
@@ -44478,7 +44478,7 @@ static JSValue js_map_forEach(JSContext *ctx, JSValueConst this_val,
     JSMapState *s = JS_GetOpaque2(ctx, this_val, JS_CLASS_MAP + magic);
     JSValueConst func, this_arg;
     JSValue ret, args[3];
-    struct list_head *el;
+    struct jsrt_list_head *el;
     JSMapRecord *mr;
 
     if (!s)
@@ -44524,7 +44524,7 @@ static void js_map_finalizer(JSRuntime *rt, JSValue val)
 {
     JSObject *p;
     JSMapState *s;
-    struct list_head *el, *el1;
+    struct jsrt_list_head *el, *el1;
     JSMapRecord *mr;
 
     p = JS_VALUE_GET_OBJ(val);
@@ -44552,7 +44552,7 @@ static void js_map_mark(JSRuntime *rt, JSValueConst val, JS_MarkFunc *mark_func)
 {
     JSObject *p = JS_VALUE_GET_OBJ(val);
     JSMapState *s;
-    struct list_head *el;
+    struct jsrt_list_head *el;
     JSMapRecord *mr;
 
     s = p->u.map_state;
@@ -44641,7 +44641,7 @@ static JSValue js_map_iterator_next(JSContext *ctx, JSValueConst this_val,
     JSMapIteratorData *it;
     JSMapState *s;
     JSMapRecord *mr;
-    struct list_head *el;
+    struct jsrt_list_head *el;
 
     it = JS_GetOpaque2(ctx, this_val, JS_CLASS_MAP_ITERATOR + magic);
     if (!it) {
@@ -44829,7 +44829,7 @@ typedef enum JSPromiseStateEnum {
 typedef struct JSPromiseData {
     JSPromiseStateEnum promise_state;
     /* 0=fulfill, 1=reject, list of JSPromiseReactionData.link */
-    struct list_head promise_reactions[2];
+    struct jsrt_list_head promise_reactions[2];
     BOOL is_handled; /* Note: only useful to debug */
     JSValue promise_result;
 } JSPromiseData;
@@ -44845,7 +44845,7 @@ typedef struct JSPromiseFunctionData {
 } JSPromiseFunctionData;
 
 typedef struct JSPromiseReactionData {
-    struct list_head link; /* not used in promise_reaction_job */
+    struct jsrt_list_head link; /* not used in promise_reaction_job */
     JSValue resolving_funcs[2];
     JSValue handler;
 } JSPromiseReactionData;
@@ -44916,7 +44916,7 @@ static void fulfill_or_reject_promise(JSContext *ctx, JSValueConst promise,
                                       JSValueConst value, BOOL is_reject)
 {
     JSPromiseData *s = JS_GetOpaque(promise, JS_CLASS_PROMISE);
-    struct list_head *el, *el1;
+    struct jsrt_list_head *el, *el1;
     JSPromiseReactionData *rd;
     JSValueConst args[5];
 
@@ -45111,7 +45111,7 @@ static JSValue js_promise_resolve_function_call(JSContext *ctx,
 static void js_promise_finalizer(JSRuntime *rt, JSValue val)
 {
     JSPromiseData *s = JS_GetOpaque(val, JS_CLASS_PROMISE);
-    struct list_head *el, *el1;
+    struct jsrt_list_head *el, *el1;
     int i;
 
     if (!s)
@@ -45131,7 +45131,7 @@ static void js_promise_mark(JSRuntime *rt, JSValueConst val,
                             JS_MarkFunc *mark_func)
 {
     JSPromiseData *s = JS_GetOpaque(val, JS_CLASS_PROMISE);
-    struct list_head *el;
+    struct jsrt_list_head *el;
     int i;
 
     if (!s)
@@ -49786,7 +49786,7 @@ static JSValue js_array_buffer_get_byteLength(JSContext *ctx,
 void JS_DetachArrayBuffer(JSContext *ctx, JSValueConst obj)
 {
     JSArrayBuffer *abuf = JS_GetOpaque(obj, JS_CLASS_ARRAY_BUFFER);
-    struct list_head *el;
+    struct jsrt_list_head *el;
 
     if (!abuf || abuf->detached)
         return;
@@ -52262,14 +52262,14 @@ static JSValue js_atomics_isLockFree(JSContext *ctx,
 }
 
 typedef struct JSAtomicsWaiter {
-    struct list_head link;
+    struct jsrt_list_head link;
     BOOL linked;
     pthread_cond_t cond;
     int32_t *ptr;
 } JSAtomicsWaiter;
 
 static pthread_mutex_t js_atomics_mutex = PTHREAD_MUTEX_INITIALIZER;
-static struct list_head js_atomics_waiter_list =
+static struct jsrt_list_head js_atomics_waiter_list =
     LIST_HEAD_INIT(js_atomics_waiter_list);
 
 static JSValue js_atomics_wait(JSContext *ctx,
@@ -52360,7 +52360,7 @@ static JSValue js_atomics_notify(JSContext *ctx,
                                  JSValueConst this_obj,
                                  int argc, JSValueConst *argv)
 {
-    struct list_head *el, *el1, waiter_list;
+    struct jsrt_list_head *el, *el1, waiter_list;
     int32_t count, n;
     void *ptr;
     JSAtomicsWaiter *waiter;
