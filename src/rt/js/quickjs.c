@@ -1689,7 +1689,7 @@ static const JSMallocFunctions def_malloc_funcs = {
 #elif defined(EMSCRIPTEN)
     NULL,
 #elif defined(__linux__)
-    (size_t (*)(const void *))malloc_usable_size,
+    (size_t (*)(const void *))kmem_malloc_usable_size,
 #else
     /* change this to `NULL,` if compilation fails */
     malloc_usable_size,
