@@ -94,6 +94,62 @@ double log1p(double x) {
 }
 
 /**
+ * Unsure if this has the intended behavior for cbrt -Aaron
+ */
+void getHighWordD(int32_t* h, double x) {
+  union z {
+    double d;
+    int64_t i64;
+  };
+  union z k;
+  k.d = x;
+  *h = (k.i64 >> 16) & ((1L << 17) - 1);
+}
+
+/**
+ * Unsure if this has the intended behavior for cbrt -Aaron
+ */
+void getLowWordD(int32_t* l, double x) {
+  union z {
+    double d;
+    int64_t i64;
+  };
+  union z k;
+  k.d = x;
+  *l = k.i64 & ((1L << 17) - 1);
+}
+
+/**
+ * Unsure if this has the intended behavior for cbrt -Aaron
+ */
+void setHighWordD(double* x, int32_t h) {
+  union z {
+    double d;
+    int64_t i64;
+  };
+  union z k;
+  k.d = *x;
+  k.i64 &= ((1L << 17) - 1);
+  k.i64 |= ((int64_t)h) << 32;
+  *x = k.d;
+}
+
+/**
+ * Unsure if this has the intended behavior for cbrt -Aaron
+ */
+void setLowWordD(double* x, int32_t l) {
+  union z {
+    double d;
+    int64_t i64;
+  };
+  union z k;
+  k.d = *x;
+  k.i64 &= (((1L << 17) - 1) << 32);
+  k.i64 |= l;
+  *x = k.d;
+}
+
+/**
  * @brief Cube root function
  */
 double cbrt(double x) {
@@ -101,7 +157,7 @@ double cbrt(double x) {
   double r, s, t = 0.0, w;
   uint32_t sign;
 
-  GET_HIGH_WORD(hx, x);
+  getHighWordD(&hx, x);
 
   // sign = sign(x)
   sign = hx & 0x80000000;
@@ -112,7 +168,7 @@ double cbrt(double x) {
     return x + x;
   }
 
-  GET_LOW_WORD(lx, x);
+  getLowWordD(&lx, x);
 
   // cbrt(0) is itself
   if ((hx | lx) == 0) {
@@ -120,17 +176,17 @@ double cbrt(double x) {
   }
 
   // x <- |x|
-  SET_HIGH_WORD(x, hx);
+  setHighWordD(&x, hx);
 
   // rough cbrt to 5 bits
   if (hx < 0x00100000) // subnormal number
   {
-    SET_HIGH_WORD(t, 0x43500000); // set t= 2**54
+    setHighWordD(&t, 0x43500000); // set t= 2**54
     t *= x;
-    GET_HIGH_WORD(ht, t);
-    SET_HIGH_WORD(t, ht / 3 + B2);
+    getHighWordD(&ht, t);
+    setHighWordD(&t, ht / 3 + B2);
   } else {
-    SET_HIGH_WORD(t, hx / 3 + B1);
+    setHighWordD(&t, hx / 3 + B1);
   }
 
   // new cbrt to 23 bits, may be implemented in single precision
@@ -139,9 +195,9 @@ double cbrt(double x) {
   t *= G + F / (s + E + D / s);
 
   // chopped to 20 bits and make it larger than cbrt(x)
-  SET_LOW_WORD(t, 0);
-  GET_HIGH_WORD(ht, t);
-  SET_HIGH_WORD(t, ht + 0x00000001);
+  setHighWordD(&t, 0);
+  getHighWordD(&ht, t);
+  setHighWordD(&t, ht + 0x00000001);
 
   // one step newton iteration to 53 bits with error less than 0.667 ulps
   s = t * t; // t*t is exact
@@ -151,8 +207,8 @@ double cbrt(double x) {
   t = t + t * r;
 
   // retore the sign bit
-  GET_HIGH_WORD(ht, t);
-  SET_HIGH_WORD(t, ht | sign);
+  getHighWordD(&ht, t);
+  setHighWordD(&t, ht | sign);
 
   return (t);
 }
