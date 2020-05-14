@@ -1379,6 +1379,7 @@ menu "Runtimes"
        config JS_RT
            bool "JavaScript Interpreter"
            default n
+           depends on USE_NAUT_BUILTINS
            help
              JavaScript Interpreter
 
