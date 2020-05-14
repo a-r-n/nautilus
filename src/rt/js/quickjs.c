@@ -4921,21 +4921,23 @@ static JSValue js_c_function_data_call(JSContext *ctx, JSValueConst func_obj,
                                        int argc, JSValueConst *argv, int flags)
 {
     JSCFunctionDataRecord *s = JS_GetOpaque(func_obj, JS_CLASS_C_FUNCTION_DATA);
-    JSValueConst *arg_buf;
+    JSValueConst arg_buf[s->length];
+    JSValueConst* arg_buf_ptr;
     int i;
 
     /* XXX: could add the function on the stack for debug */
     if (unlikely(argc < s->length)) {
-        arg_buf = alloca(sizeof(arg_buf[0]) * s->length);
+        // arg_buf = alloca(sizeof(arg_buf[0]) * s->length);
+        arg_buf_ptr = arg_buf;
         for(i = 0; i < argc; i++)
             arg_buf[i] = argv[i];
         for(i = argc; i < s->length; i++)
             arg_buf[i] = JS_UNDEFINED;
     } else {
-        arg_buf = argv;
+        arg_buf_ptr = argv;
     }
 
-    return s->func(ctx, this_val, argc, arg_buf, s->magic, s->data);
+    return s->func(ctx, this_val, argc, arg_buf_ptr, s->magic, s->data);
 }
 
 JSValue JS_NewCFunctionData(JSContext *ctx, JSCFunctionData *func,

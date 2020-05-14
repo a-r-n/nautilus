@@ -28,7 +28,8 @@
 #include <nautilus/mm.h>
 //#include <nautilus/libccompat.h>
 
-#include <assert.h> //I think this is fine to be in the kernel
+// #include <assert.h> //I think this is fine to be in the kernel
+// I am disabling this because it looks scary and is easy to implement ourselves
 
 #include <rt/js/quickjs-libc.h>
 // #include <rt/js/config.h>
