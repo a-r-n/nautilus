@@ -1,5 +1,13 @@
 #include <rt/js/config.h>
 
+void MATHLIB_WARNING() {
+  UNDEF_FUN_ERR();
+}
+
+double chebyshev_eval(double x, double* y, int z) {
+  UNDEF_FUN_ERR();
+}
+
 double log1p(double x) {
   /* series for log1p on the interval -.375 to .375
    *				     with weighted error   6.35e-32

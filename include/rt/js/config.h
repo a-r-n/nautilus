@@ -6,6 +6,10 @@
 #include <nautilus/naut_types.h>
 #include <nautilus/nautilus.h>
 
+#ifndef UNDEF_FUN_ERR
+#define UNDEF_FUN_ERR ERROR_PRINT("Function (%s) undefined\n", __func__)
+#endif
+
 #define PRINT(fmt, args...) nk_vc_printf(fmt, ##args)
 #define PUTC(c) nk_vc_putchar(c)
 #define printf PRINT
@@ -85,22 +89,22 @@ static inline uint32_t log2(const uint32_t x) {
 #define ML_ERROR(x, s)                                                         \
   {                                                                            \
     if (x > ME_DOMAIN) {                                                       \
-      char *msg = "";                                                          \
+      char* msg;                                                          \
       switch (x) {                                                             \
       case ME_DOMAIN:                                                          \
-        msg = _("argument out of domain in '%s'\n");                           \
+        msg = "argument out of domain in '%s'\n";                           \
         break;                                                                 \
       case ME_RANGE:                                                           \
-        msg = _("value out of range in '%s'\n");                               \
+        msg = "value out of range in '%s'\n";                               \
         break;                                                                 \
       case ME_NOCONV:                                                          \
-        msg = _("convergence failed in '%s'\n");                               \
+        msg = "convergence failed in '%s'\n";                               \
         break;                                                                 \
       case ME_PRECISION:                                                       \
-        msg = _("full precision may not have been achieved in '%s'\n");        \
+        msg = "full precision may not have been achieved in '%s'\n";        \
         break;                                                                 \
       case ME_UNDERFLOW:                                                       \
-        msg = _("underflow occurred in '%s'\n");                               \
+        msg = "underflow occurred in '%s'\n";                               \
         break;                                                                 \
       }                                                                        \
       MATHLIB_WARNING(msg, s);                                                 \
