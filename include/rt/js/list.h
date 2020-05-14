@@ -33,7 +33,7 @@ struct jsrt_list_head {
     struct jsrt_list_head *next;
 };
 
-#define LIST_HEAD_INIT(el) { &(el), &(el) }
+#define JS_LIST_HEAD_INIT(el) { &(el), &(el) }
 
 /* return the pointer of type 'type *' containing 'el' as field 'member' */
 #define list_entry(el, type, member) \

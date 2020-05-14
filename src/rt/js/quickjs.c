@@ -1712,9 +1712,11 @@ void JS_SetGCThreshold(JSRuntime *rt, size_t gc_threshold)
     rt->malloc_gc_threshold = gc_threshold;
 }
 
-#define malloc(s) malloc_is_forbidden(s)
-#define free(p) free_is_forbidden(p)
-#define realloc(p,s) realloc_is_forbidden(p,s)
+// I think these defines were added to aid development.
+// They are not useful
+// #define malloc(s) malloc_is_forbidden(s)
+// #define free(p) free_is_forbidden(p)
+// #define realloc(p,s) realloc_is_forbidden(p,s)
 
 void JS_SetInterruptHandler(JSRuntime *rt, JSInterruptHandler *cb, void *opaque)
 {
@@ -40460,11 +40462,6 @@ static uint64_t xorshift64star(uint64_t *pstate)
 
 static void js_random_init(JSContext *ctx)
 {
-    // ORIGINAL CODE:
-    // struct timeval tv;
-    // gettimeofday(&tv, NULL);
-    // ctx->random_state = ((sint64_t)tv.tv_sec * 1000000) + tv.tv_usec;
-    // END ORIGINAL CODE
     ctx->random_state = __rdtsc();
     /* the state must be non zero */
     if (ctx->random_state == 0)
@@ -52270,7 +52267,7 @@ typedef struct JSAtomicsWaiter {
 
 static pthread_mutex_t js_atomics_mutex = PTHREAD_MUTEX_INITIALIZER;
 static struct jsrt_list_head js_atomics_waiter_list =
-    LIST_HEAD_INIT(js_atomics_waiter_list);
+    JS_LIST_HEAD_INIT(js_atomics_waiter_list);
 
 static JSValue js_atomics_wait(JSContext *ctx,
                                JSValueConst this_obj,

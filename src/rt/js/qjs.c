@@ -31,7 +31,7 @@
 #include <assert.h> //I think this is fine to be in the kernel
 
 #include <rt/js/quickjs-libc.h>
-//#include <rt/js/config.h>
+// #include <rt/js/config.h>
 //#include <rt/js/cutils.h> // conflicts with un/likely def in include/intrinsics.h
 // still need this from it tho:
 

@@ -25,9 +25,10 @@
 #ifndef CUTILS_H
 #define CUTILS_H
 
-#include <nautilus/libccompat.h>
-#include <nautilus/naut_types.h>
+#include <rt/js/config.h>
 #include <rt/js/quickjs.h>
+
+#define int8_t sint8_t
 
 /* set if CPU is big endian */
 #undef WORDS_BIGENDIAN
@@ -290,5 +291,7 @@ static inline int from_hex(int c)
 void rqsort(void *base, size_t nmemb, size_t size,
             int (*cmp)(const void *, const void *, void *),
             void *arg);
+
+#undef int8_t
 
 #endif  /* CUTILS_H */
