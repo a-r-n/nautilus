@@ -14,10 +14,6 @@
 #define _fprintf fprintf
 #define _putc(c, stdout) PUTC(c)
 
-#define stdin ((void *)0UL)
-#define stdout ((void *)1UL)
-#define stderr ((void *)2UL)
-
 #define putc _putc
 
 // typedef char int8_t;
