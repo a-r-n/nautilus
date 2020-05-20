@@ -308,7 +308,7 @@ int atomic_load(void* x) { STUBBY }
 
 int pthread_cond_timedwait(void* x, void* y, void* z) { STUBBY }
 int pthread_cond_destroy(void* x) { STUBBY }
-int pthread_cond_signal(void* x);
+int pthread_cond_signal(void* x) { STUBBY }
 int pthread_cond_init(void* x, int y) { STUBBY }
 int pthread_cond_wait(void* x, void* y) { STUBBY }
 
