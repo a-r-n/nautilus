@@ -20,6 +20,14 @@
 
 #define putc _putc
 
+FILE* popen(const char* filename, const char* mode);
+int pclose(FILE* stream);
+
+int open(const char* pathname, int flags);
+// this one is a hack because we can't overload in c afaik \/
+int openm(const char* pathname, int flags, int mode);
+int close(int fd);
+
 // typedef char int8_t;
 typedef sint16_t int16_t;
 typedef sint32_t int32_t;
@@ -65,10 +73,10 @@ static inline uint32_t log2(const uint32_t x) {
 #define ML_NEGINF ((-1.0) / 0.0)
 #define ML_NAN (0.0 / 0.0)
 
-#define ML_ERR_return_NAN                                                      \
-  {                                                                            \
-    ML_ERROR(ME_DOMAIN, "");                                                   \
-    return ML_NAN;                                                             \
+#define ML_ERR_return_NAN    \
+  {                          \
+    ML_ERROR(ME_DOMAIN, ""); \
+    return ML_NAN;           \
   }
 
 #define ME_NONE 0
@@ -86,29 +94,29 @@ static inline uint32_t log2(const uint32_t x) {
 
 //# define MATHLIB_WARNING(fmt,x)		warning(fmt,x)
 
-#define ML_ERROR(x, s)                                                         \
-  {                                                                            \
-    if (x > ME_DOMAIN) {                                                       \
-      char* msg;                                                          \
-      switch (x) {                                                             \
-      case ME_DOMAIN:                                                          \
-        msg = "argument out of domain in '%s'\n";                           \
-        break;                                                                 \
-      case ME_RANGE:                                                           \
-        msg = "value out of range in '%s'\n";                               \
-        break;                                                                 \
-      case ME_NOCONV:                                                          \
-        msg = "convergence failed in '%s'\n";                               \
-        break;                                                                 \
-      case ME_PRECISION:                                                       \
-        msg = "full precision may not have been achieved in '%s'\n";        \
-        break;                                                                 \
-      case ME_UNDERFLOW:                                                       \
-        msg = "underflow occurred in '%s'\n";                               \
-        break;                                                                 \
-      }                                                                        \
-      MATHLIB_WARNING(msg, s);                                                 \
-    }                                                                          \
+#define ML_ERROR(x, s)                                               \
+  {                                                                  \
+    if (x > ME_DOMAIN) {                                             \
+      char* msg;                                                     \
+      switch (x) {                                                   \
+      case ME_DOMAIN:                                                \
+        msg = "argument out of domain in '%s'\n";                    \
+        break;                                                       \
+      case ME_RANGE:                                                 \
+        msg = "value out of range in '%s'\n";                        \
+        break;                                                       \
+      case ME_NOCONV:                                                \
+        msg = "convergence failed in '%s'\n";                        \
+        break;                                                       \
+      case ME_PRECISION:                                             \
+        msg = "full precision may not have been achieved in '%s'\n"; \
+        break;                                                       \
+      case ME_UNDERFLOW:                                             \
+        msg = "underflow occurred in '%s'\n";                        \
+        break;                                                       \
+      }                                                              \
+      MATHLIB_WARNING(msg, s);                                       \
+    }                                                                \
   }
 
 double log1p(double);
@@ -125,6 +133,82 @@ static const double
 
 double cbrt(double);
 
+#define JS_UNSPECIFIED 0
+#ifndef RTLD_NOW
+#define RTLD_NOW JS_UNSPECIFIED
+#endif
+#ifndef RTDL_LOCAL
+#define RTLD_LOCAL JS_UNSPECIFIED
+#endif
+
 void assert(int);
+
+char* realpath(const char* name, char* resolved);
+
+int ftello(FILE*);
+
+int fseeko(FILE*, int, int);
+
+int fgetc(FILE*);
+
+int lseek(int, int, int);
+
+// fs stuff?
+
+int getcwd(char*, int);
+int chdir(const char*);
+int mkdir(const char*, int);
+int symlink(const char*, const char*);
+int readlink(const char*, char*, int);
+int utimes(const char*, int);
+int putchar(char);
+int dup(int);
+int dup2(int x, int y);
+int openm(const char*, int, int);
+
+int nanosleep(struct timespec*, void*);
+
+int waitpid(int, int*, int);
+
+int pipe(int*);
+
+int kill(int, int);
+
+int dlopen(char*, int);
+
+int dlsym(void*, char*);
+
+int dlclose(int x);
+
+int lrint(int x);
+
+int isfinite(int x);
+
+int alloca(int x);
+
+// I didn't check these signatures
+int atomic_fetch_add(void* x, int y);
+int atomic_fetch_and(void* x, int y);
+int atomic_fetch_or(void* x, int y);
+int atomic_fetch_sub(void* x, int y);
+int atomic_fetch_xor(void* x, int y);
+int atomic_exchange(void* x, int y);
+int atomic_store(void* x, int y);
+int atomic_compare_exchange_strong(void* x, void* y, int z);
+int atomic_load(void* x);
+
+int pthread_cond_timedwait(void* x, void* y, void* z);
+int pthread_cond_destroy(void* x);
+int pthread_cond_signal(void* x);
+int pthread_cond_init(void* x, int y);
+int pthread_cond_wait(void* x, void* y);
+
+int fmin(int x, int y);
+int fmax(int x, int y);
+
+int signbit(int x);
+
+int round(int x);
+int hypot(int x, int y);
 
 // end my defs

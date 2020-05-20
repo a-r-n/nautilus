@@ -1,12 +1,8 @@
 #include <rt/js/config.h>
 
-void MATHLIB_WARNING() {
-  UNDEF_FUN_ERR();
-}
+void MATHLIB_WARNING() { UNDEF_FUN_ERR(); }
 
-double chebyshev_eval(double x, double* y, int z) {
-  UNDEF_FUN_ERR();
-}
+double chebyshev_eval(double x, double* y, int z) { UNDEF_FUN_ERR(); }
 
 double log1p(double x) {
   /* series for log1p on the interval -.375 to .375
@@ -227,3 +223,99 @@ void assert(int x) {
     exit(1);
   }
 }
+
+char* realpath(const char* name, char* resolved) {
+  UNDEF_FUN_ERR();
+  return NULL;
+}
+
+FILE* popen(const char* filename, const char* mode) {
+  UNDEF_FUN_ERR();
+  return NULL;
+}
+int pclose(FILE* stream) {
+  UNDEF_FUN_ERR();
+  return 0;
+}
+int open(const char* pathname, int flags) {
+  UNDEF_FUN_ERR();
+  return 0;
+}
+int close(int fd) {
+  UNDEF_FUN_ERR();
+  return 0;
+}
+
+#define STUBBY     \
+  UNDEF_FUN_ERR(); \
+  return 0;
+
+int ftello(FILE* x) { STUBBY }
+
+int fseeko(FILE* x, int y, int z) { STUBBY }
+
+int fgetc(FILE* x) { STUBBY }
+
+int lseek(int x, int y, int z) { STUBBY }
+
+int getcwd(char* x, int y) { STUBBY }
+
+int chdir(const char* x) { STUBBY }
+
+int mkdir(const char* x, int y) { STUBBY }
+
+int symlink(const char* x, const char* y) { STUBBY }
+
+int readlink(const char* x, char* y, int z) { STUBBY }
+
+int utimes(const char* x, int y) { STUBBY }
+
+int putchar(char x) { STUBBY }
+
+int dup(int x) { STUBBY }
+int dup2(int x, int y) { STUBBY }
+int openm(const char* x, int y, int z) { STUBBY }
+
+int nanosleep(struct timespec* x, void* y) { STUBBY }
+
+int waitpid(int x, int* y, int z) { STUBBY }
+
+int pipe(int* x) { STUBBY }
+
+int kill(int x, int y) { STUBBY }
+
+int dlopen(char* x, int y) { STUBBY }
+
+int dlsym(void* x, char* y) { STUBBY }
+
+int dlclose(int x) { STUBBY }
+
+int lrint(int x) { STUBBY }
+
+int isfinite(int x) { STUBBY }
+
+int alloca(int x) { STUBBY }
+
+int atomic_fetch_add(void* x, int y) { STUBBY }
+int atomic_fetch_and(void* x, int y) { STUBBY }
+int atomic_fetch_or(void* x, int y) { STUBBY }
+int atomic_fetch_sub(void* x, int y) { STUBBY }
+int atomic_fetch_xor(void* x, int y) { STUBBY }
+int atomic_exchange(void* x, int y) { STUBBY }
+int atomic_store(void* x, int y) { STUBBY }
+int atomic_compare_exchange_strong(void* x, void* y, int z) { STUBBY }
+int atomic_load(void* x) { STUBBY }
+
+int pthread_cond_timedwait(void* x, void* y, void* z) { STUBBY }
+int pthread_cond_destroy(void* x) { STUBBY }
+int pthread_cond_signal(void* x);
+int pthread_cond_init(void* x, int y) { STUBBY }
+int pthread_cond_wait(void* x, void* y) { STUBBY }
+
+int fmin(int x, int y) { STUBBY }
+int fmax(int x, int y) { STUBBY }
+
+int signbit(int x) { STUBBY }
+
+int round(int x) { STUBBY }
+int hypot(int x, int y) { STUBBY }
