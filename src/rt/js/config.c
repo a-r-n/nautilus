@@ -1,12 +1,8 @@
 #include <rt/js/config.h>
 
-void MATHLIB_WARNING() {
-  UNDEF_FUN_ERR();
-}
+void MATHLIB_WARNING() { UNDEF_FUN_ERR(); }
 
-double chebyshev_eval(double x, double* y, int z) {
-  UNDEF_FUN_ERR();
-}
+double chebyshev_eval(double x, double* y, int z) { UNDEF_FUN_ERR(); }
 
 double log1p(double x) {
   /* series for log1p on the interval -.375 to .375
@@ -226,4 +222,102 @@ void assert(int x) {
     PRINT("FAIL ASSERT");
     exit(1);
   }
+}
+
+char* realpath(const char* name, char* resolved) {
+  UNDEF_FUN_ERR();
+  return NULL;
+}
+
+FILE* popen(const char* filename, const char* mode) {
+  UNDEF_FUN_ERR();
+  return NULL;
+}
+int pclose(FILE* stream) {
+  UNDEF_FUN_ERR();
+  return 0;
+}
+int open(const char* pathname, int flags) {
+  UNDEF_FUN_ERR();
+  return 0;
+}
+int close(int fd) {
+  UNDEF_FUN_ERR();
+  return 0;
+}
+
+#define STUBBY     \
+  UNDEF_FUN_ERR(); \
+  return 0;
+
+int ftello(FILE* x) {
+  STUBBY
+}
+
+int fseeko(FILE* x, int y, int z) {
+  STUBBY
+}
+
+int fgetc(FILE* x) {
+  STUBBY
+}
+
+int lseek(int x, int y, int z) {
+  STUBBY
+}
+
+int getcwd(char* x, int y) {
+  STUBBY
+}
+
+int chdir(const char* x) {
+  STUBBY
+}
+
+int mkdir(const char* x, int y) {
+  STUBBY
+}
+
+int symlink(const char* x, const char* y) {
+  STUBBY
+}
+
+int readlink(const char* x, char* y, int z) {
+  STUBBY
+}
+
+int utimes(const char* x, int y) {
+  STUBBY
+}
+
+int putchar(char x) {
+  STUBBY
+}
+
+int dup(int x) {
+  STUBBY
+}
+
+int nanosleep(struct timespec* x, void* y) {
+  STUBBY
+}
+
+int waitpid(int x, int* y, int z) {
+  STUBBY
+}
+
+int pipe(int* x) {
+  STUBBY
+}
+
+int kill(int x, int y) {
+  STUBBY
+}
+
+int dlopen(char* x, int y) {
+  STUBBY
+}
+
+int dlsym(void* x, char* y) {
+  STUBBY
 }
