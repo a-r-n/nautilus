@@ -40464,7 +40464,7 @@ static uint64_t xorshift64star(uint64_t *pstate)
 
 static void js_random_init(JSContext *ctx)
 {
-    ctx->random_state = __rdtsc();
+    ctx->random_state = rdtsc();
     /* the state must be non zero */
     if (ctx->random_state == 0)
         ctx->random_state = 1;

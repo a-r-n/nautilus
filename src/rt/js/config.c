@@ -259,22 +259,16 @@ int fgetc(FILE* x) { STUBBY }
 int lseek(int x, int y, int z) { STUBBY }
 
 int getcwd(char* x, int y) { STUBBY }
-
 int chdir(const char* x) { STUBBY }
-
 int mkdir(const char* x, int y) { STUBBY }
-
 int symlink(const char* x, const char* y) { STUBBY }
-
 int readlink(const char* x, char* y, int z) { STUBBY }
-
 int utimes(const char* x, int y) { STUBBY }
-
 int putchar(char x) { STUBBY }
-
 int dup(int x) { STUBBY }
 int dup2(int x, int y) { STUBBY }
 int openm(const char* x, int y, int z) { STUBBY }
+int perror(const char* x) { STUBBY }
 
 int nanosleep(struct timespec* x, void* y) { STUBBY }
 
@@ -319,3 +313,5 @@ int signbit(int x) { STUBBY }
 
 int round(int x) { STUBBY }
 int hypot(int x, int y) { STUBBY }
+
+int countof(int x) { STUBBY }

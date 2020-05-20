@@ -1,9 +1,11 @@
 #include <nautilus/nautilus.h>
 #include <nautilus/shell.h>
+#include <rt/js/config.h>
 
 
 static int entry(char* buf, void* priv) {
-    printk("TEST\n");
+    char* argv[] = {"js"};
+    jsrt_main(1, argv);
     return 0;
 }
 

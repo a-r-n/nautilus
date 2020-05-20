@@ -261,7 +261,7 @@ void help(void)
     exit(1);
 }
 
-int js_main(int argc, char **argv)
+int jsrt_main(int argc, char **argv)
 {
     JSRuntime *rt;
     JSContext *ctx;

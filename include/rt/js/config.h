@@ -21,6 +21,8 @@
 
 #define putc _putc
 
+int jsrt_main(int argc, char* argv[]);
+
 FILE* popen(const char* filename, const char* mode);
 int pclose(FILE* stream);
 
@@ -166,6 +168,7 @@ int putchar(char);
 int dup(int);
 int dup2(int x, int y);
 int openm(const char*, int, int);
+int perror(const char*);
 
 int nanosleep(struct timespec*, void*);
 
@@ -211,5 +214,7 @@ int signbit(int x);
 
 int round(int x);
 int hypot(int x, int y);
+
+int countof(int x);
 
 // end my defs
