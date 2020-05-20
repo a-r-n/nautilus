@@ -23,9 +23,15 @@
 FILE* popen(const char* filename, const char* mode);
 int pclose(FILE* stream);
 
+<<<<<<< HEAD
 int open(const char* pathname, int flags);
 // this one is a hack because we can't overload in c afaik \/
 int openm(const char* pathname, int flags, int mode);
+=======
+int open(const char *pathname, int flags);
+//this one is a hack because we can't overload in c afaik \/
+int openm(const char *pathname, int flags, int mode);
+>>>>>>> b14cda5287710c656d5f42db60fd39b98fd00d69
 int close(int fd);
 
 // typedef char int8_t;
@@ -153,6 +159,7 @@ int fgetc(FILE*);
 
 int lseek(int, int, int);
 
+<<<<<<< HEAD
 // fs stuff?
 
 int getcwd(char*, int);
@@ -167,6 +174,27 @@ int dup2(int x, int y);
 int openm(const char*, int, int);
 
 int nanosleep(struct timespec*, void*);
+=======
+//fs stuff?
+
+int getcwd(char*, int);
+
+int chdir(const char*);
+
+int mkdir(const char*, int);
+
+int symlink(const char*, const char*);
+
+int readlink(const char*, char*, int);
+
+int utimes(const char*, int);
+
+int putchar(char);
+
+int dup(int);
+
+int nanosleep(struct timespec*,void*);
+>>>>>>> b14cda5287710c656d5f42db60fd39b98fd00d69
 
 int waitpid(int, int*, int);
 
