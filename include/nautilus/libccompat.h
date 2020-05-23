@@ -176,7 +176,7 @@ char * strerror(int);
 
 int fclose(FILE*);
 #ifndef LIB_LUA
-FILE * fopen(const char*, FILE*); // Default signature is fopen(cont*,cont*)
+FILE * fopen(const char*, const char*); // Default signature is fopen(cont*,cont*)
 #else
 FILE *fopen(const char *restrict filename, const char *restrict mode);
 #endif

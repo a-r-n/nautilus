@@ -29,6 +29,7 @@
  */
 
 
+#include "nautilus/fs.h"
 #define LIBCCOMPAT 1
 
 #include <nautilus/nautilus.h>
@@ -337,10 +338,15 @@ fclose (FILE * f)
 
 
 FILE * 
-fopen (const char * path, FILE * f)
+fopen (const char * path, const char * f)
 {
-    UNDEF_FUN_ERR();
+    if (*f == 'r') {
+        // just patching this enough to get read to work, hopefully
+        return nk_fs_open((char*)path, O_RDONLY, 0);
+    } else {
+        UNDEF_FUN_ERR();
     return NULL;
+    }
 }
 
 
