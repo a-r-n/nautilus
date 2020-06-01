@@ -363,7 +363,7 @@ COMMON_FLAGS :=-fno-omit-frame-pointer \
 
 
 ifdef NAUT_CONFIG_USE_GCC
-  COMMON_FLAGS += -O2  -fno-delete-null-pointer-checks
+  COMMON_FLAGS += -O1  -fno-delete-null-pointer-checks -DDUMP_LEAKS
   GCCVERSIONGTE6 := $(shell expr `$(CC) -dumpversion | cut -f1 -d.` \>= 6)
   ifeq "$(GCCVERSIONGTE6)" "1"
     COMMON_FLAGS += -no-pie -fno-pic -fno-PIC -fno-PIE
@@ -403,12 +403,12 @@ CXXFLAGS := $(COMMON_FLAGS) \
 			-fno-rtti 
 
 CFLAGS:=   $(COMMON_FLAGS) \
-		   -Wall \
-		   -Wno-unused-function \
-		   -Wno-unused-variable \
-		   -fno-common \
-		   -Wstrict-overflow=5 
-
+#		   -Wall \
+#		   -Wno-unused-function \
+#		   -Wno-unused-variable \
+#		   -fno-common \
+#		   -Wstrict-overflow=5 
+#
 #                   -Wextra \
 #                   -Wpedantic \
 #

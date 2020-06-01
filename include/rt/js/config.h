@@ -144,7 +144,14 @@ double cbrt(double);
 #define RTLD_LOCAL JS_UNSPECIFIED
 #endif
 
-void assert(int);
+#define assert(x)             \
+  do {                        \
+    if (!(x)) {               \
+      panic("ASSERT FAILED"); \
+    }                         \
+  } while (false)
+
+// void assert(int);
 
 char* realpath(const char* name, char* resolved);
 
@@ -216,5 +223,7 @@ int round(int x);
 int hypot(int x, int y);
 
 int countof(int x);
+
+int fesetround(int x);
 
 // end my defs

@@ -217,12 +217,12 @@ double cbrt(double x) {
   return (t);
 }
 
-void assert(int x) {
-  if (!x) {
-    PRINT("FAIL ASSERT");
-    exit(1);
-  }
-}
+// void assert(int x) {
+//   if (!x) {
+//     PRINT("FAIL ASSERT");
+//     exit(1);
+//   }
+// }
 
 char* realpath(const char* name, char* resolved) {
   UNDEF_FUN_ERR();
@@ -315,3 +315,5 @@ int round(int x) { STUBBY }
 int hypot(int x, int y) { STUBBY }
 
 int countof(int x) { STUBBY }
+
+int fesetround(int x) { STUBBY }

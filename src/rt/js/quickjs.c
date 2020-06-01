@@ -1908,6 +1908,7 @@ void JS_FreeRuntime(JSRuntime *rt)
             printf("Secondary object leaks: %d\n", count);
     }
 #endif
+    //TODO: reenable this assertion, something is leaking
     assert(jsrt_list_empty(&rt->gc_obj_list));
 
     /* free the classes */

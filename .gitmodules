@@ -1,0 +1,3 @@
+[submodule "src/rt/js/tests/test262"]
+	path = src/rt/js/tests/test262
+	url = git@github.com:tc39/test262.git
