@@ -635,7 +635,7 @@ function test_enum()
 
 test();
 test_function();
-test_enum(); 
+test_enum();
 // test_array();
 // test_string();
 // test_math();

@@ -83,17 +83,17 @@ static inline int jsrt_list_empty(struct jsrt_list_head *el)
     return el->next == el;
 }
 
-#define list_for_each(el, head) \
+#define js_list_for_each(el, head) \
   for(el = (head)->next; el != (head); el = el->next)
 
-#define list_for_each_safe(el, el1, head)                \
+#define js_list_for_each_safe(el, el1, head)                \
     for(el = (head)->next, el1 = el->next; el != (head); \
         el = el1, el1 = el->next)
 
-#define list_for_each_prev(el, head) \
+#define js_list_for_each_prev(el, head) \
   for(el = (head)->prev; el != (head); el = el->prev)
 
-#define list_for_each_prev_safe(el, el1, head)           \
+#define js_list_for_each_prev_safe(el, el1, head)           \
     for(el = (head)->prev, el1 = el->prev; el != (head); \
         el = el1, el1 = el->prev)
 
