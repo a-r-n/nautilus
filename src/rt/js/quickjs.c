@@ -1557,15 +1557,15 @@ JSRuntime *JS_NewRuntime2(const JSMallocFunctions *mf, void *opaque)
     set_dummy_numeric_ops(&rt->bigdecimal_ops);
 #endif
 
-    init_list_head(&rt->context_list);
-    init_list_head(&rt->gc_obj_list);
-    init_list_head(&rt->gc_zero_ref_count_list);
+    js_init_list_head(&rt->context_list);
+    js_init_list_head(&rt->gc_obj_list);
+    js_init_list_head(&rt->gc_zero_ref_count_list);
     rt->gc_phase = JS_GC_PHASE_NONE;
     
 #ifdef DUMP_LEAKS
-    init_list_head(&rt->string_list);
+    js_init_list_head(&rt->string_list);
 #endif
-    init_list_head(&rt->job_list);
+    js_init_list_head(&rt->job_list);
 
     if (JS_InitAtoms(rt))
         goto fail;
@@ -1770,7 +1770,7 @@ int JS_ExecutePendingJob(JSRuntime *rt, JSContext **pctx)
     }
 
     /* get the first pending job and execute it */
-    e = list_entry(rt->job_list.next, JSJobEntry, link);
+    e = js_list_entry(rt->job_list.next, JSJobEntry, link);
     jsrt_list_del(&e->link);
     ctx = e->ctx;
     res = e->job_func(e->ctx, e->argc, (JSValueConst *)e->argv);
@@ -1860,12 +1860,12 @@ void JS_FreeRuntime(JSRuntime *rt)
     JS_FreeValueRT(rt, rt->current_exception);
 
     js_list_for_each_safe(el, el1, &rt->job_list) {
-        JSJobEntry *e = list_entry(el, JSJobEntry, link);
+        JSJobEntry *e = js_list_entry(el, JSJobEntry, link);
         for(i = 0; i < e->argc; i++)
             JS_FreeValueRT(rt, e->argv[i]);
         js_free_rt(rt, e);
     }
-    init_list_head(&rt->job_list);
+    js_init_list_head(&rt->job_list);
 
     JS_RunGC(rt);
 
@@ -1879,14 +1879,14 @@ void JS_FreeRuntime(JSRuntime *rt)
         /* remove the internal refcounts to display only the object
            referenced externally */
         js_list_for_each(el, &rt->gc_obj_list) {
-            p = list_entry(el, JSGCObjectHeader, link);
+            p = js_list_entry(el, JSGCObjectHeader, link);
             p->mark = 0;
         }
         gc_decref(rt);
 
         header_done = FALSE;
         js_list_for_each(el, &rt->gc_obj_list) {
-            p = list_entry(el, JSGCObjectHeader, link);
+            p = js_list_entry(el, JSGCObjectHeader, link);
             if (p->ref_count != 0) {
                 if (!header_done) {
                     printf("Object leaks:\n");
@@ -1899,7 +1899,7 @@ void JS_FreeRuntime(JSRuntime *rt)
 
         count = 0;
         js_list_for_each(el, &rt->gc_obj_list) {
-            p = list_entry(el, JSGCObjectHeader, link);
+            p = js_list_entry(el, JSGCObjectHeader, link);
             if (p->ref_count == 0) {
                 count++;
             }
@@ -2004,7 +2004,7 @@ void JS_FreeRuntime(JSRuntime *rt)
                    "REFCNT", "VALUE");
         }
         js_list_for_each_safe(el, el1, &rt->string_list) {
-            JSString *str = list_entry(el, JSString, link);
+            JSString *str = js_list_entry(el, JSString, link);
             if (rt->rt_info) {
                 printf(" ");
             } else {
@@ -2069,7 +2069,7 @@ JSContext *JS_NewContextRaw(JSRuntime *rt)
     ctx->array_ctor = JS_NULL;
     ctx->regexp_ctor = JS_NULL;
     ctx->promise_ctor = JS_NULL;
-    init_list_head(&ctx->loaded_modules);
+    js_init_list_head(&ctx->loaded_modules);
 
     JS_AddIntrinsicBasicObjects(ctx);
     return ctx;
@@ -2144,7 +2144,7 @@ static void js_free_modules(JSContext *ctx, JSFreeModuleEnum flag)
 {
     struct jsrt_list_head *el, *el1;
     js_list_for_each_safe(el, el1, &ctx->loaded_modules) {
-        JSModuleDef *m = list_entry(el, JSModuleDef, link);
+        JSModuleDef *m = js_list_entry(el, JSModuleDef, link);
         if (flag == JS_FREE_MODULE_ALL ||
             (flag == JS_FREE_MODULE_NOT_RESOLVED && !m->resolved) ||
             (flag == JS_FREE_MODULE_NOT_EVALUATED && !m->evaluated)) {
@@ -2169,7 +2169,7 @@ static void JS_MarkContext(JSRuntime *rt, JSContext *ctx,
     /* modules are not seen by the GC, so we directly mark the objects
        referenced by each module */
     js_list_for_each(el, &ctx->loaded_modules) {
-        JSModuleDef *m = list_entry(el, JSModuleDef, link);
+        JSModuleDef *m = js_list_entry(el, JSModuleDef, link);
         js_mark_module_def(rt, m, mark_func);
     }
 
@@ -2220,7 +2220,7 @@ void JS_FreeContext(JSContext *ctx)
         printf("JSObjects: {\n");
         JS_DumpObjectHeader(ctx->rt);
         js_list_for_each(el, &rt->gc_obj_list) {
-            p = list_entry(el, JSGCObjectHeader, link);
+            p = js_list_entry(el, JSGCObjectHeader, link);
             JS_DumpGCObject(rt, p);
         }
         printf("}\n");
@@ -3319,7 +3319,7 @@ static int JS_NewClass1(JSRuntime *rt, JSClassID class_id,
 
         /* reallocate the context class prototype array, if any */
         js_list_for_each(el, &rt->context_list) {
-            JSContext *ctx = list_entry(el, JSContext, link);
+            JSContext *ctx = js_list_entry(el, JSContext, link);
             JSValue *new_tab;
             new_tab = js_realloc_rt(rt, ctx->class_proto,
                                     sizeof(ctx->class_proto[0]) * new_size);
@@ -4545,7 +4545,7 @@ static __maybe_unused void JS_DumpShapes(JSRuntime *rt)
     }
     /* dump non-hashed shapes */
     js_list_for_each(el, &rt->gc_obj_list) {
-        gp = list_entry(el, JSGCObjectHeader, link);
+        gp = js_list_entry(el, JSGCObjectHeader, link);
         if (gp->gc_obj_type == JS_GC_OBJ_TYPE_JS_OBJECT) {
             p = (JSObject *)gp;
             if (!p->shape->is_hashed) {
@@ -5284,7 +5284,7 @@ static void free_zero_refcount(JSRuntime *rt)
         el = rt->gc_zero_ref_count_list.next;
         if (el == &rt->gc_zero_ref_count_list)
             break;
-        p = list_entry(el, JSGCObjectHeader, link);
+        p = js_list_entry(el, JSGCObjectHeader, link);
         assert(p->ref_count == 0);
         free_gc_object(rt, p);
     }
@@ -5511,13 +5511,13 @@ static void gc_decref(JSRuntime *rt)
     struct jsrt_list_head *el, *el1;
     JSGCObjectHeader *p;
     
-    init_list_head(&rt->tmp_obj_list);
+    js_init_list_head(&rt->tmp_obj_list);
 
     /* decrement the refcount of all the children of all the GC
        objects and move the GC objects with zero refcount to
        tmp_obj_list */
     js_list_for_each_safe(el, el1, &rt->gc_obj_list) {
-        p = list_entry(el, JSGCObjectHeader, link);
+        p = js_list_entry(el, JSGCObjectHeader, link);
         assert(p->mark == 0);
         mark_children(rt, p, gc_decref_child);
         p->mark = 1;
@@ -5552,7 +5552,7 @@ static void gc_scan(JSRuntime *rt)
 
     /* keep the objects with a refcount > 0 and their children. */
     js_list_for_each(el, &rt->gc_obj_list) {
-        p = list_entry(el, JSGCObjectHeader, link);
+        p = js_list_entry(el, JSGCObjectHeader, link);
         assert(p->ref_count > 0);
         p->mark = 0; /* reset the mark for the next GC call */
         mark_children(rt, p, gc_scan_incref_child);
@@ -5560,7 +5560,7 @@ static void gc_scan(JSRuntime *rt)
     
     /* restore the refcount of the objects to be deleted. */
     js_list_for_each(el, &rt->tmp_obj_list) {
-        p = list_entry(el, JSGCObjectHeader, link);
+        p = js_list_entry(el, JSGCObjectHeader, link);
         mark_children(rt, p, gc_scan_incref_child2);
     }
 }
@@ -5579,7 +5579,7 @@ static void gc_free_cycles(JSRuntime *rt)
         el = rt->tmp_obj_list.next;
         if (el == &rt->tmp_obj_list)
             break;
-        p = list_entry(el, JSGCObjectHeader, link);
+        p = js_list_entry(el, JSGCObjectHeader, link);
         /* Only need to free the GC object associated with JS
            values. The rest will be automatically removed because they
            must be referenced by them. */
@@ -5605,13 +5605,13 @@ static void gc_free_cycles(JSRuntime *rt)
     rt->gc_phase = JS_GC_PHASE_NONE;
            
     js_list_for_each_safe(el, el1, &rt->gc_zero_ref_count_list) {
-        p = list_entry(el, JSGCObjectHeader, link);
+        p = js_list_entry(el, JSGCObjectHeader, link);
         assert(p->gc_obj_type == JS_GC_OBJ_TYPE_JS_OBJECT ||
                p->gc_obj_type == JS_GC_OBJ_TYPE_FUNCTION_BYTECODE);
         js_free_rt(rt, p);
     }
 
-    init_list_head(&rt->gc_zero_ref_count_list);
+    js_init_list_head(&rt->gc_zero_ref_count_list);
 }
 
 void JS_RunGC(JSRuntime *rt)
@@ -5734,7 +5734,7 @@ void JS_ComputeMemoryUsage(JSRuntime *rt, JSMemoryUsage *s)
     s->memory_used_size = sizeof(JSRuntime) + sizeof(JSValue) * rt->class_count;
 
     js_list_for_each(el, &rt->context_list) {
-        JSContext *ctx = list_entry(el, JSContext, link);
+        JSContext *ctx = js_list_entry(el, JSContext, link);
         JSShape *sh = ctx->array_shape;
         s->memory_used_count += 2; /* ctx + ctx->class_proto */
         s->memory_used_size += sizeof(JSContext) +
@@ -5749,7 +5749,7 @@ void JS_ComputeMemoryUsage(JSRuntime *rt, JSMemoryUsage *s)
             s->shape_size += get_shape_size(hash_size, sh->prop_size);
         }
         js_list_for_each(el1, &ctx->loaded_modules) {
-            JSModuleDef *m = list_entry(el1, JSModuleDef, link);
+            JSModuleDef *m = js_list_entry(el1, JSModuleDef, link);
             s->memory_used_count += 1;
             s->memory_used_size += sizeof(*m);
             if (m->req_module_entries) {
@@ -5782,7 +5782,7 @@ void JS_ComputeMemoryUsage(JSRuntime *rt, JSMemoryUsage *s)
     }
 
     js_list_for_each(el, &rt->gc_obj_list) {
-        JSGCObjectHeader *gp = list_entry(el, JSGCObjectHeader, link);
+        JSGCObjectHeader *gp = js_list_entry(el, JSGCObjectHeader, link);
         JSObject *p;
         JSShape *sh;
         JSShapeProperty *prs;
@@ -6051,7 +6051,7 @@ void JS_DumpMemoryUsage(FILE *fp, const JSMemoryUsage *s, JSRuntime *rt)
             int class_id;
             struct jsrt_list_head *el;
             js_list_for_each(el, &rt->gc_obj_list) {
-                JSGCObjectHeader *gp = list_entry(el, JSGCObjectHeader, link);
+                JSGCObjectHeader *gp = js_list_entry(el, JSGCObjectHeader, link);
                 JSObject *p;
                 if (gp->gc_obj_type == JS_GC_OBJ_TYPE_JS_OBJECT) {
                     p = (JSObject *)gp;
@@ -15273,7 +15273,7 @@ static JSVarRef *get_var_ref(JSContext *ctx, JSStackFrame *sf,
     struct jsrt_list_head *el;
 
     js_list_for_each(el, &sf->var_ref_list) {
-        var_ref = list_entry(el, JSVarRef, header.link);
+        var_ref = js_list_entry(el, JSVarRef, header.link);
         if (var_ref->var_idx == var_idx && var_ref->is_arg == is_arg) {
             var_ref->header.ref_count++;
             return var_ref;
@@ -15521,7 +15521,7 @@ static void close_var_refs(JSRuntime *rt, JSStackFrame *sf)
     int var_idx;
 
     js_list_for_each_safe(el, el1, &sf->var_ref_list) {
-        var_ref = list_entry(el, JSVarRef, header.link);
+        var_ref = js_list_entry(el, JSVarRef, header.link);
         var_idx = var_ref->var_idx;
         if (var_ref->is_arg)
             var_ref->value = JS_DupValueRT(rt, sf->arg_buf[var_idx]);
@@ -15541,7 +15541,7 @@ static void close_lexical_var(JSContext *ctx, JSStackFrame *sf, int idx, int is_
     int var_idx = idx;
 
     js_list_for_each_safe(el, el1, &sf->var_ref_list) {
-        var_ref = list_entry(el, JSVarRef, header.link);
+        var_ref = js_list_entry(el, JSVarRef, header.link);
         if (var_idx == var_ref->var_idx && var_ref->is_arg == is_arg) {
             var_ref->value = JS_DupValue(ctx, sf->var_buf[var_idx]);
             var_ref->pvalue = &var_ref->value;
@@ -15861,7 +15861,7 @@ static JSValue JS_CallInternal(JSContext *caller_ctx, JSValueConst func_obj,
     arg_buf = argv;
     sf->arg_count = argc;
     sf->cur_func = (JSValue)func_obj;
-    init_list_head(&sf->var_ref_list);
+    js_init_list_head(&sf->var_ref_list);
     var_refs = p->u.func.var_refs;
 
     local_buf = alloca(alloca_size);
@@ -18476,7 +18476,7 @@ static __exception int async_func_init(JSContext *ctx, JSAsyncFunctionState *s,
     int local_count, i, arg_buf_len, n;
 
     sf = &s->frame;
-    init_list_head(&sf->var_ref_list);
+    js_init_list_head(&sf->var_ref_list);
     p = JS_VALUE_GET_OBJ(func_obj);
     b = p->u.func.function_bytecode;
     sf->js_mode = b->js_mode;
@@ -19022,7 +19022,7 @@ static void js_async_generator_free(JSRuntime *rt,
     JSAsyncGeneratorRequest *req;
 
     js_list_for_each_safe(el, el1, &s->queue) {
-        req = list_entry(el, JSAsyncGeneratorRequest, link);
+        req = js_list_entry(el, JSAsyncGeneratorRequest, link);
         JS_FreeValueRT(rt, req->result);
         JS_FreeValueRT(rt, req->promise);
         JS_FreeValueRT(rt, req->resolving_funcs[0]);
@@ -19053,7 +19053,7 @@ static void js_async_generator_mark(JSRuntime *rt, JSValueConst val,
     JSAsyncGeneratorRequest *req;
     if (s) {
         js_list_for_each(el, &s->queue) {
-            req = list_entry(el, JSAsyncGeneratorRequest, link);
+            req = js_list_entry(el, JSAsyncGeneratorRequest, link);
             JS_MarkValue(rt, req->result, mark_func);
             JS_MarkValue(rt, req->promise, mark_func);
             JS_MarkValue(rt, req->resolving_funcs[0], mark_func);
@@ -19135,7 +19135,7 @@ static void js_async_generator_resolve_or_reject(JSContext *ctx,
     JSAsyncGeneratorRequest *next;
     JSValue ret;
 
-    next = list_entry(s->queue.next, JSAsyncGeneratorRequest, link);
+    next = js_list_entry(s->queue.next, JSAsyncGeneratorRequest, link);
     jsrt_list_del(&next->link);
     ret = JS_Call(ctx, next->resolving_funcs[is_reject], JS_UNDEFINED, 1,
                   &result);
@@ -19213,7 +19213,7 @@ static void js_async_generator_resume_next(JSContext *ctx,
     for(;;) {
         if (jsrt_list_empty(&s->queue))
             break;
-        next = list_entry(s->queue.next, JSAsyncGeneratorRequest, link);
+        next = js_list_entry(s->queue.next, JSAsyncGeneratorRequest, link);
         switch(s->state) {
         case JS_ASYNC_GENERATOR_STATE_EXECUTING:
             /* only happens when restarting execution after await() */
@@ -19394,7 +19394,7 @@ static JSValue js_async_generator_function_call(JSContext *ctx, JSValueConst fun
     if (!s)
         return JS_EXCEPTION;
     s->state = JS_ASYNC_GENERATOR_STATE_SUSPENDED_START;
-    init_list_head(&s->queue);
+    js_init_list_head(&s->queue);
     if (async_func_init(ctx, &s->func_state, func_obj, this_obj, argc, argv)) {
         s->state = JS_ASYNC_GENERATOR_STATE_COMPLETED;
         goto fail;
@@ -26556,7 +26556,7 @@ static JSModuleDef *js_find_loaded_module(JSContext *ctx, JSAtom name)
     
     /* first look at the loaded modules */
     js_list_for_each(el, &ctx->loaded_modules) {
-        m = list_entry(el, JSModuleDef, link);
+        m = js_list_entry(el, JSModuleDef, link);
         if (m->module_name == name)
             return m;
     }
@@ -27907,7 +27907,7 @@ static JSFunctionDef *js_new_function_def(JSContext *ctx,
         return NULL;
 
     fd->ctx = ctx;
-    init_list_head(&fd->child_list);
+    js_init_list_head(&fd->child_list);
 
     /* insert in parent list */
     fd->parent = parent;
@@ -27993,7 +27993,7 @@ static void js_free_function_def(JSContext *ctx, JSFunctionDef *fd)
     /* free the child functions */
     js_list_for_each_safe(el, el1, &fd->child_list) {
         JSFunctionDef *fd1;
-        fd1 = list_entry(el, JSFunctionDef, link);
+        fd1 = js_list_entry(el, JSFunctionDef, link);
         js_free_function_def(ctx, fd1);
     }
 
@@ -31600,7 +31600,7 @@ static JSValue js_create_function(JSContext *ctx, JSFunctionDef *fd)
         JSFunctionDef *fd1;
         int cpool_idx;
 
-        fd1 = list_entry(el, JSFunctionDef, link);
+        fd1 = js_list_entry(el, JSFunctionDef, link);
         cpool_idx = fd1->parent_cpool_idx;
         func_obj = js_create_function(ctx, fd1);
         if (JS_IsException(func_obj))
@@ -44068,14 +44068,14 @@ static JSValue js_map_constructor(JSContext *ctx, JSValueConst new_target,
     s = js_mallocz(ctx, sizeof(*s));
     if (!s)
         goto fail;
-    init_list_head(&s->records);
+    js_init_list_head(&s->records);
     s->is_weak = is_weak;
     JS_SetOpaque(obj, s);
     s->hash_size = 1;
     s->hash_table = js_malloc(ctx, sizeof(s->hash_table[0]) * s->hash_size);
     if (!s->hash_table)
         goto fail;
-    init_list_head(&s->hash_table[0]);
+    js_init_list_head(&s->hash_table[0]);
     s->record_count_threshold = 4;
 
     arr = JS_UNDEFINED;
@@ -44220,7 +44220,7 @@ static JSMapRecord *map_find_record(JSContext *ctx, JSMapState *s,
     uint32_t h;
     h = map_hash_key(ctx, key) & (s->hash_size - 1);
     js_list_for_each(el, &s->hash_table[h]) {
-        mr = list_entry(el, JSMapRecord, hash_link);
+        mr = js_list_entry(el, JSMapRecord, hash_link);
         if (js_same_value_zero(ctx, mr->key, key))
             return mr;
     }
@@ -44246,10 +44246,10 @@ static void map_hash_resize(JSContext *ctx, JSMapState *s)
     new_hash_size += slack / sizeof(*new_hash_table);
 
     for(i = 0; i < new_hash_size; i++)
-        init_list_head(&new_hash_table[i]);
+        js_init_list_head(&new_hash_table[i]);
 
     js_list_for_each(el, &s->records) {
-        mr = list_entry(el, JSMapRecord, link);
+        mr = js_list_entry(el, JSMapRecord, link);
         if (!mr->empty) {
             h = map_hash_key(ctx, mr->key) & (new_hash_size - 1);
             jsrt_list_add_tail(&mr->hash_link, &new_hash_table[h]);
@@ -44457,7 +44457,7 @@ static JSValue js_map_clear(JSContext *ctx, JSValueConst this_val,
     if (!s)
         return JS_EXCEPTION;
     js_list_for_each_safe(el, el1, &s->records) {
-        mr = list_entry(el, JSMapRecord, link);
+        mr = js_list_entry(el, JSMapRecord, link);
         map_delete_record(ctx->rt, s, mr);
     }
     return JS_UNDEFINED;
@@ -44493,7 +44493,7 @@ static JSValue js_map_forEach(JSContext *ctx, JSValueConst this_val,
        current element is locked */
     el = s->records.next;
     while (el != &s->records) {
-        mr = list_entry(el, JSMapRecord, link);
+        mr = js_list_entry(el, JSMapRecord, link);
         if (!mr->empty) {
             mr->ref_count++;
             /* must duplicate in case the record is deleted */
@@ -44532,7 +44532,7 @@ static void js_map_finalizer(JSRuntime *rt, JSValue val)
         /* if the object is deleted we are sure that no iterator is
            using it */
         js_list_for_each_safe(el, el1, &s->records) {
-            mr = list_entry(el, JSMapRecord, link);
+            mr = js_list_entry(el, JSMapRecord, link);
             if (!mr->empty) {
                 if (s->is_weak)
                     delete_weak_ref(rt, mr);
@@ -44557,7 +44557,7 @@ static void js_map_mark(JSRuntime *rt, JSValueConst val, JS_MarkFunc *mark_func)
     s = p->u.map_state;
     if (s) {
         js_list_for_each(el, &s->records) {
-            mr = list_entry(el, JSMapRecord, link);
+            mr = js_list_entry(el, JSMapRecord, link);
             if (!s->is_weak)
                 JS_MarkValue(rt, mr->key, mark_func);
             JS_MarkValue(rt, mr->value, mark_func);
@@ -44669,7 +44669,7 @@ static JSValue js_map_iterator_next(JSContext *ctx, JSValueConst this_val,
             *pdone = TRUE;
             return JS_UNDEFINED;
         }
-        mr = list_entry(el, JSMapRecord, link);
+        mr = js_list_entry(el, JSMapRecord, link);
         if (!mr->empty)
             break;
         /* get the next record */
@@ -44935,7 +44935,7 @@ static void fulfill_or_reject_promise(JSContext *ctx, JSValueConst promise,
     }
 
     js_list_for_each_safe(el, el1, &s->promise_reactions[is_reject]) {
-        rd = list_entry(el, JSPromiseReactionData, link);
+        rd = js_list_entry(el, JSPromiseReactionData, link);
         args[0] = rd->resolving_funcs[0];
         args[1] = rd->resolving_funcs[1];
         args[2] = rd->handler;
@@ -44947,7 +44947,7 @@ static void fulfill_or_reject_promise(JSContext *ctx, JSValueConst promise,
     }
 
     js_list_for_each_safe(el, el1, &s->promise_reactions[1 - is_reject]) {
-        rd = list_entry(el, JSPromiseReactionData, link);
+        rd = js_list_entry(el, JSPromiseReactionData, link);
         jsrt_list_del(&rd->link);
         promise_reaction_data_free(ctx->rt, rd);
     }
@@ -45118,7 +45118,7 @@ static void js_promise_finalizer(JSRuntime *rt, JSValue val)
     for(i = 0; i < 2; i++) {
         js_list_for_each_safe(el, el1, &s->promise_reactions[i]) {
             JSPromiseReactionData *rd =
-                list_entry(el, JSPromiseReactionData, link);
+                js_list_entry(el, JSPromiseReactionData, link);
             promise_reaction_data_free(rt, rd);
         }
     }
@@ -45138,7 +45138,7 @@ static void js_promise_mark(JSRuntime *rt, JSValueConst val,
     for(i = 0; i < 2; i++) {
         js_list_for_each(el, &s->promise_reactions[i]) {
             JSPromiseReactionData *rd =
-                list_entry(el, JSPromiseReactionData, link);
+                js_list_entry(el, JSPromiseReactionData, link);
             JS_MarkValue(rt, rd->resolving_funcs[0], mark_func);
             JS_MarkValue(rt, rd->resolving_funcs[1], mark_func);
             JS_MarkValue(rt, rd->handler, mark_func);
@@ -45168,7 +45168,7 @@ static JSValue js_promise_constructor(JSContext *ctx, JSValueConst new_target,
     s->promise_state = JS_PROMISE_PENDING;
     s->is_handled = FALSE;
     for(i = 0; i < 2; i++)
-        init_list_head(&s->promise_reactions[i]);
+        js_init_list_head(&s->promise_reactions[i]);
     s->promise_result = JS_UNDEFINED;
     JS_SetOpaque(obj, s);
     if (js_create_resolving_functions(ctx, args, obj))
@@ -49650,7 +49650,7 @@ static JSValue js_array_buffer_constructor3(JSContext *ctx,
     } else {
         abuf->data = buf;
     }
-    init_list_head(&abuf->array_list);
+    js_init_list_head(&abuf->array_list);
     abuf->detached = FALSE;
     abuf->shared = (class_id == JS_CLASS_SHARED_ARRAY_BUFFER);
     abuf->opaque = opaque;
@@ -49799,7 +49799,7 @@ void JS_DetachArrayBuffer(JSContext *ctx, JSValueConst obj)
         JSTypedArray *ta;
         JSObject *p;
 
-        ta = list_entry(el, JSTypedArray, link);
+        ta = js_list_entry(el, JSTypedArray, link);
         p = ta->obj;
         /* Note: the typed array length and offset fields are not modified */
         if (p->class_id != JS_CLASS_DATAVIEW) {
@@ -52378,9 +52378,9 @@ static JSValue js_atomics_notify(JSContext *ctx,
     n = 0;
     if (count > 0) {
         pthread_mutex_lock(&js_atomics_mutex);
-        init_list_head(&waiter_list);
+        js_init_list_head(&waiter_list);
         js_list_for_each_safe(el, el1, &js_atomics_waiter_list) {
-            waiter = list_entry(el, JSAtomicsWaiter, link);
+            waiter = js_list_entry(el, JSAtomicsWaiter, link);
             if (waiter->ptr == ptr) {
                 jsrt_list_del(&waiter->link);
                 waiter->linked = FALSE;
@@ -52391,7 +52391,7 @@ static JSValue js_atomics_notify(JSContext *ctx,
             }
         }
         js_list_for_each(el, &waiter_list) {
-            waiter = list_entry(el, JSAtomicsWaiter, link);
+            waiter = js_list_entry(el, JSAtomicsWaiter, link);
             pthread_cond_signal(&waiter->cond);
         }
         pthread_mutex_unlock(&js_atomics_mutex);

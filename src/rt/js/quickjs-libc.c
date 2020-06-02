@@ -1620,8 +1620,8 @@ static JSOSRWHandler *find_rh(int fd)
 {
     JSOSRWHandler *rh;
     struct jsrt_list_head *el;
-    list_for_each(el, &os_rw_handlers) {
-        rh = list_entry(el, JSOSRWHandler, link);
+    js_list_for_each(el, &os_rw_handlers) {
+        rh = js_list_entry(el, JSOSRWHandler, link);
         if (rh->fd == fd)
             return rh;
     }
@@ -1670,7 +1670,7 @@ static JSValue js_os_setReadHandler(JSContext *ctx, JSValueConst this_val,
             rh->fd = fd;
             rh->rw_func[0] = JS_NULL;
             rh->rw_func[1] = JS_NULL;
-            list_add_tail(&rh->link, &os_rw_handlers);
+            jsrt_list_add_tail(&rh->link, &os_rw_handlers);
         }
         JS_FreeValue(ctx, rh->rw_func[magic]);
         rh->rw_func[magic] = JS_DupValue(ctx, func);
@@ -1682,8 +1682,8 @@ static JSOSSignalHandler *find_sh(int sig_num)
 {
     JSOSSignalHandler *sh;
     struct jsrt_list_head *el;
-    list_for_each(el, &os_signal_handlers) {
-        sh = list_entry(el, JSOSSignalHandler, link);
+    js_list_for_each(el, &os_signal_handlers) {
+        sh = js_list_entry(el, JSOSSignalHandler, link);
         if (sh->sig_num == sig_num)
             return sh;
     }
@@ -1741,7 +1741,7 @@ static JSValue js_os_signal(JSContext *ctx, JSValueConst this_val,
             if (!sh)
                 return JS_EXCEPTION;
             sh->sig_num = sig_num;
-            list_add_tail(&sh->link, &os_signal_handlers);
+            jsrt_list_add_tail(&sh->link, &os_signal_handlers);
         }
         JS_FreeValue(ctx, sh->func);
         sh->func = JS_DupValue(ctx, func);
@@ -1826,7 +1826,7 @@ static JSValue js_os_setTimeout(JSContext *ctx, JSValueConst this_val,
     th->has_object = TRUE;
     th->timeout = get_time_ms() + delay;
     th->func = JS_DupValue(ctx, func);
-    list_add_tail(&th->link, &os_timers);
+    jsrt_list_add_tail(&th->link, &os_timers);
     JS_SetOpaque(obj, th);
     return obj;
 }
@@ -1871,15 +1871,15 @@ static int js_os_poll(JSContext *ctx)
     
     /* XXX: handle signals if useful */
 
-    if (list_empty(&os_rw_handlers) && list_empty(&os_timers))
+    if (jsrt_list_empty(&os_rw_handlers) && jsrt_list_empty(&os_timers))
         return -1; /* no more events */
     
     /* XXX: only timers and basic console input are supported */
-    if (!list_empty(&os_timers)) {
+    if (!jsrt_list_empty(&os_timers)) {
         cur_time = get_time_ms();
         min_delay = 10000;
-        list_for_each(el, &os_timers) {
-            JSOSTimer *th = list_entry(el, JSOSTimer, link);
+        js_list_for_each(el, &os_timers) {
+            JSOSTimer *th = js_list_entry(el, JSOSTimer, link);
             delay = th->timeout - cur_time;
             if (delay <= 0) {
                 JSValue func;
@@ -1901,8 +1901,8 @@ static int js_os_poll(JSContext *ctx)
     }
 
     console_fd = -1;
-    list_for_each(el, &os_rw_handlers) {
-        rh = list_entry(el, JSOSRWHandler, link);
+    js_list_for_each(el, &os_rw_handlers) {
+        rh = js_list_entry(el, JSOSRWHandler, link);
         if (rh->fd == 0 && !JS_IsNull(rh->rw_func[0])) {
             console_fd = rh->fd;
             break;
@@ -1919,8 +1919,8 @@ static int js_os_poll(JSContext *ctx)
         handle = (HANDLE)_get_osfhandle(console_fd);
         ret = WaitForSingleObject(handle, ti);
         if (ret == WAIT_OBJECT_0) {
-            list_for_each(el, &os_rw_handlers) {
-                rh = list_entry(el, JSOSRWHandler, link);
+            js_list_for_each(el, &os_rw_handlers) {
+                rh = js_list_entry(el, JSOSRWHandler, link);
                 if (rh->fd == console_fd && !JS_IsNull(rh->rw_func[0])) {
                     call_handler(ctx, rh->rw_func[0]);
                     /* must stop because the list may have been modified */
@@ -1948,8 +1948,8 @@ static int js_os_poll(JSContext *ctx)
         JSOSSignalHandler *sh;
         uint64_t mask;
         
-        list_for_each(el, &os_signal_handlers) {
-            sh = list_entry(el, JSOSSignalHandler, link);
+        js_list_for_each(el, &os_signal_handlers) {
+            sh = js_list_entry(el, JSOSSignalHandler, link);
             mask = (uint64_t)1 << sh->sig_num;
             if (os_pending_signals & mask) {
                 os_pending_signals &= ~mask;
@@ -1959,14 +1959,14 @@ static int js_os_poll(JSContext *ctx)
         }
     }
     
-    if (list_empty(&os_rw_handlers) && list_empty(&os_timers))
+    if (jsrt_list_empty(&os_rw_handlers) && jsrt_list_empty(&os_timers))
         return -1; /* no more events */
     
-    if (!list_empty(&os_timers)) {
+    if (!jsrt_list_empty(&os_timers)) {
         cur_time = get_time_ms();
         min_delay = 10000;
-        list_for_each(el, &os_timers) {
-            JSOSTimer *th = list_entry(el, JSOSTimer, link);
+        js_list_for_each(el, &os_timers) {
+            JSOSTimer *th = js_list_entry(el, JSOSTimer, link);
             delay = th->timeout - cur_time;
             if (delay <= 0) {
                 JSValue func;
@@ -1993,8 +1993,8 @@ static int js_os_poll(JSContext *ctx)
     // FD_ZERO(&rfds);
     // FD_ZERO(&wfds);
     fd_max = -1;
-    list_for_each(el, &os_rw_handlers) {
-        rh = list_entry(el, JSOSRWHandler, link);
+    js_list_for_each(el, &os_rw_handlers) {
+        rh = js_list_entry(el, JSOSRWHandler, link);
         fd_max = max_int(fd_max, rh->fd);
         if (!JS_IsNull(rh->rw_func[0]));
             // FD_SET(rh->fd, &rfds);
@@ -2004,8 +2004,8 @@ static int js_os_poll(JSContext *ctx)
     
     // ret = select(fd_max + 1, &rfds, &wfds, NULL, tvp);
     // if (ret > 0) {
-    //     list_for_each(el, &os_rw_handlers) {
-    //         rh = list_entry(el, JSOSRWHandler, link);
+    //     js_list_for_each(el, &os_rw_handlers) {
+    //         rh = js_list_entry(el, JSOSRWHandler, link);
     //         if (!JS_IsNull(rh->rw_func[0]) &&
     //             FD_ISSET(rh->fd, &rfds)) {
     //             call_handler(ctx, rh->rw_func[0]);
@@ -2910,9 +2910,9 @@ void js_std_add_helpers(JSContext *ctx, int argc, char **argv)
     JS_FreeValue(ctx, global_obj);
 
     /* XXX: not multi-context */
-    init_list_head(&os_rw_handlers);
-    init_list_head(&os_signal_handlers);
-    init_list_head(&os_timers);
+    js_init_list_head(&os_rw_handlers);
+    js_init_list_head(&os_signal_handlers);
+    js_init_list_head(&os_timers);
     os_pending_signals = 0;
 }
 
@@ -2920,18 +2920,18 @@ void js_std_free_handlers(JSRuntime *rt)
 {
     struct jsrt_list_head *el, *el1;
 
-    list_for_each_safe(el, el1, &os_rw_handlers) {
-        JSOSRWHandler *rh = list_entry(el, JSOSRWHandler, link);
+    js_list_for_each_safe(el, el1, &os_rw_handlers) {
+        JSOSRWHandler *rh = js_list_entry(el, JSOSRWHandler, link);
         free_rw_handler(rt, rh);
     }
 
-    list_for_each_safe(el, el1, &os_signal_handlers) {
-        JSOSSignalHandler *sh = list_entry(el, JSOSSignalHandler, link);
+    js_list_for_each_safe(el, el1, &os_signal_handlers) {
+        JSOSSignalHandler *sh = js_list_entry(el, JSOSSignalHandler, link);
         free_sh(rt, sh);
     }
     
-    list_for_each_safe(el, el1, &os_timers) {
-        JSOSTimer *th = list_entry(el, JSOSTimer, link);
+    js_list_for_each_safe(el, el1, &os_timers) {
+        JSOSTimer *th = js_list_entry(el, JSOSTimer, link);
         unlink_timer(rt, th);
         if (!th->has_object)
             free_timer(rt, th);

@@ -36,10 +36,10 @@ struct jsrt_list_head {
 #define JS_LIST_HEAD_INIT(el) { &(el), &(el) }
 
 /* return the pointer of type 'type *' containing 'el' as field 'member' */
-#define list_entry(el, type, member) \
+#define js_list_entry(el, type, member) \
     ((type *)((uint8_t *)(el) - offsetof(type, member)))
 
-static inline void init_list_head(struct jsrt_list_head *head)
+static inline void js_init_list_head(struct jsrt_list_head *head)
 {
     head->prev = head;
     head->next = head;
