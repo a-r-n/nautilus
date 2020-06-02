@@ -122,12 +122,12 @@ time (time_t * timer)
 }
 
 
-void 
-abort(void) 
-{
-    printk("Thread called abort\n");
-    nk_thread_exit(NULL);
-}
+// void 
+// abort(void) 
+// {
+//     printk("Thread called abort\n");
+//     nk_thread_exit(NULL);
+// }
 
 
 int 
@@ -686,10 +686,10 @@ double fabs(double __x){
     return abs(__x);
 }
 double atan(double __x){
-    return 45.000;
+    STUBBY
 }
 double atan2(double y, double x){
-    return 135.00;
+    STUBBY
 }
 double fmod(double y, double x){
     // this is replacement to actual fmod() (/nautilus/libccompat)
@@ -738,103 +738,103 @@ else
 }
 double sin(double x)
 {
-return x;
+STUBBY
 }
 double sinh(double x)
 {
-return x;
+STUBBY
 }
 double cos(double x)
 {
-return x;
+STUBBY
 }
 double cosh(double x)
 {
-return x;
+STUBBY
 }
 time_t mktime(struct tm *timeptr)
 {
-    return 0;
+STUBBY
 }
 struct tm *localtime(const time_t *timer)
 {
-    return NULL;
+    STUBBY
 }
 struct tm *gmtime(const time_t *timer)
 {
-    return NULL;
+    STUBBY
 }
 int strcoll(const char *str1, const char *str2)
 {
-    return 0;
+    STUBBY
 }
 double tan(double x)
 {
-return x;
+STUBBY
 }
 double tanh(double x)
 {
-return x;
+STUBBY
 }
 double asin(double x)
 {
-return x;
+STUBBY
 }
 double acos(double x)
 {
-return x;
+STUBBY
 }
 double asinh(double x)
 {
-return x;
+STUBBY
 }
 double acosh(double x)
 {
-return x;
+STUBBY
 }
 double atanh(double x)
 {
-return x;
+STUBBY
 }
 double ceil(double x)
 {
-return x;
+STUBBY
 }
 double floor(double x)
 {
-return x;
+STUBBY
 }
 double trunc(double x)
 {
-return x;
+STUBBY
 }
 double expm1(double x)
 {
-return x;
+STUBBY
 }
 double difftime(time_t time1, time_t time2)
 {
-    return 0;
+    STUBBY
 }
 double sqrt(double x)
 {
-return x;
+STUBBY
 }
 double pow(double x, double y)
 {
-return x;
+STUBBY
 }
 double log(double x)
 {
-return x;
+STUBBY
 }
 double log10(double x)
 {
-return x;
+STUBBY
 }
 double exp(double x)
 {
-return x;
+STUBBY
 }
 
 /* became lazy... */

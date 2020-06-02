@@ -156,12 +156,18 @@ struct timespec {
 #define L_tmpnam	1024
 #define CLOCKS_PER_SEC	1000000l /* found from time.h*/
 
+#ifndef STUBBY
+#define STUBBY     \
+  UNDEF_FUN_ERR(); \
+  return 0;
+#endif
+
 extern int errno;
 time_t time(time_t * timer);
 
 
 
-void abort(void) __attribute__((noreturn));
+// void abort(void) __attribute__((noreturn));
 int __popcountdi2(long long a);
 void exit(int status) __attribute__((noreturn));
 int clock_gettime(clockid_t, struct timespec*);
