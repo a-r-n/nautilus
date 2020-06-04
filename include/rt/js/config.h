@@ -151,6 +151,8 @@ double cbrt(double);
     }                         \
   } while (false)
 
+#define abort() panic("Call to abort()")
+
 // void assert(int);
 
 char* realpath(const char* name, char* resolved);

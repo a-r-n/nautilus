@@ -246,9 +246,11 @@ int close(int fd) {
   return 0;
 }
 
+#ifndef STUBBY
 #define STUBBY     \
   UNDEF_FUN_ERR(); \
   return 0;
+#endif
 
 int ftello(FILE* x) { STUBBY }
 

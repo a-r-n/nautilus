@@ -35,6 +35,7 @@
 // bc fnction malloc_usable_size is missing:
 #include <nautilus/mm.h>
 
+#include <nautilus/timer.h>
 
 #ifdef CONFIG_BIGNUM
 #include "libbf.h"
@@ -83,7 +84,7 @@
 /* dump objects freed by the garbage collector */
 //#define DUMP_GC_FREE
 /* dump objects leaking when freeing the runtime */
-//#define DUMP_LEAKS  1
+#define DUMP_LEAKS  1
 /* dump memory usage before running the garbage collector */
 //#define DUMP_MEM
 //#define DUMP_OBJECTS    /* dump objects in JS_FreeContext */
@@ -94,7 +95,7 @@
 //#define DUMP_READ_OBJECT
 
 /* test the GC by forcing it before each object allocation */
-//#define FORCE_GC_AT_MALLOC
+#define FORCE_GC_AT_MALLOC
 
 #ifdef CONFIG_ATOMICS
 //#include <pthread.h>
@@ -40486,6 +40487,7 @@ static JSValue js_math_random(JSContext *ctx, JSValueConst this_val,
 static const JSCFunctionListEntry js_math_funcs[] = {
     JS_CFUNC_MAGIC_DEF("min", 2, js_math_min_max, 0 ),
     JS_CFUNC_MAGIC_DEF("max", 2, js_math_min_max, 1 ),
+    JS_CFUNC_SPECIAL_DEF("nsleep", 1, i_i, nk_sleep),
     JS_CFUNC_SPECIAL_DEF("abs", 1, f_f, fabs ),
     JS_CFUNC_SPECIAL_DEF("floor", 1, f_f, floor ),
     JS_CFUNC_SPECIAL_DEF("ceil", 1, f_f, ceil ),

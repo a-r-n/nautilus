@@ -1577,7 +1577,7 @@ static JSValue js_os_ttySetRaw(JSContext *ctx, JSValueConst this_val,
     // tcsetattr(fd, TCSANOW, &tty);
 
     // atexit(term_exit);
-    return JS_UNDEFINED;
+    return JS_EXCEPTION;
 }
 
 #endif /* !_WIN32 */
