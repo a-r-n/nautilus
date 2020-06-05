@@ -19,6 +19,14 @@
 #define _fprintf fprintf
 #define _putc(c, stdout) PUTC(c)
 
+#ifndef NAUT_CONFIG_JS_RT_DEBUG
+#undef DEBUG_PRINT
+#define DEBUG_PRINT(fmt, args...)
+#endif
+#define INFO(fmt, args...)     INFO_PRINT("js: " fmt, ##args)
+#define DEBUG(fmt, args...)    DEBUG_PRINT("js: " fmt, ##args)
+#define ERROR(fmt, args...)    ERROR_PRINT("js: " fmt, ##args)
+
 #define putc _putc
 
 int jsrt_main(int argc, char* argv[]);
