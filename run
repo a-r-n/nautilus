@@ -1,1 +1,3 @@
-make -j  isoimage && qemu-system-x86_64 -smp 1 -m 2048 -vga std -serial stdio -cdrom nautilus.iso -gdb tcp::1234
+sudo docker run --rm -v $(realpath .)/:/mnt arnx/nautilus-slave
+mkdir -p .iso/boot/grub && cp configs/grub.cfg .iso/boot/grub && cp nautilus.bin nautilus.syms .iso/boot && grub-mkrescue -o nautilus.iso .iso
+qemu-system-x86_64 -s -serial stdio -vga std -smp 1 -m 2048 -cdrom nautilus.iso
