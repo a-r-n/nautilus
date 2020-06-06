@@ -263,6 +263,7 @@ void help(void)
 
 int jsrt_main(int argc, char **argv)
 {
+    DEBUG_PRINT("jsrt_main called");
     JSRuntime *rt;
     JSContext *ctx;
     struct trace_malloc_data trace_data = { NULL };

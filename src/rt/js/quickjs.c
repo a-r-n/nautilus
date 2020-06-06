@@ -1284,6 +1284,7 @@ static void *js_bf_realloc(void *opaque, void *ptr, size_t size)
 /* Throw out of memory in case of error */
 void *js_malloc(JSContext *ctx, size_t size)
 {
+    DEBUG_PRINT("js_malloc");
     void *ptr;
     ptr = js_malloc_rt(ctx->rt, size);
     if (unlikely(!ptr)) {
@@ -1625,6 +1626,7 @@ static inline size_t js_def_malloc_usable_size(void *ptr)
 
 static void *js_def_malloc(JSMallocState *s, size_t size)
 {
+    DEBUG_PRINT("js_def_malloc called");
     void *ptr;
 
     /* Do not allocate zero bytes: behavior is platform dependent */
@@ -38289,6 +38291,7 @@ static JSValue js_number_isNaN(JSContext *ctx, JSValueConst this_val,
 static JSValue js_number_isFinite(JSContext *ctx, JSValueConst this_val,
                                   int argc, JSValueConst *argv)
 {
+    DEBUG_PRINT("js_number_isFinite called");
     if (!JS_IsNumber(argv[0]))
         return JS_FALSE;
     return js_global_isFinite(ctx, this_val, argc, argv);
@@ -38452,6 +38455,7 @@ static JSValue js_number_toPrecision(JSContext *ctx, JSValueConst this_val,
     JSValue val;
     int p;
     double d;
+    DEBUG_PRINT("js_number_toPrecision called");
 
     val = js_thisNumberValue(ctx, this_val);
     if (JS_IsException(val))

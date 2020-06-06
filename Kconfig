@@ -1382,6 +1382,12 @@ menu "Runtimes"
            depends on USE_NAUT_BUILTINS
            help
              JavaScript Interpreter
+       config JS_RT_DEBUG
+           bool "Debug JS RT";
+           default n
+           depends on JS_RT
+           help
+             Debugging output for the JS RT
 
 endmenu
 
