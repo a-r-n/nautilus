@@ -195,9 +195,9 @@ int dlclose(int x);
 
 int lrint(int x);
 
-int isfinite(int x);
+int isfinite(double x);
 
-int alloca(int x);
+void* alloca(size_t x);
 
 // I didn't check these signatures
 int atomic_fetch_add(void* x, int y);

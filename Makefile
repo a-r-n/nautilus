@@ -104,7 +104,7 @@ ifdef O
 endif
 
 # That's our default target when none is given on the command line
-PHONY := _all
+.PHONY := _all
 _all:
 
 ifneq ($(KBUILD_OUTPUT),)

@@ -266,7 +266,9 @@ int mkdir(const char* x, int y) { STUBBY }
 int symlink(const char* x, const char* y) { STUBBY }
 int readlink(const char* x, char* y, int z) { STUBBY }
 int utimes(const char* x, int y) { STUBBY }
-int putchar(char x) { STUBBY }
+int putchar(char x) { 
+  return putc(x, stdout);
+ }
 int dup(int x) { STUBBY }
 int dup2(int x, int y) { STUBBY }
 int openm(const char* x, int y, int z) { STUBBY }
@@ -288,9 +290,13 @@ int dlclose(int x) { STUBBY }
 
 int lrint(int x) { STUBBY }
 
-int isfinite(int x) { STUBBY }
+int isfinite(double x) {
+  return __builtin_isfinite(x);
+}
 
-int alloca(int x) { STUBBY }
+void* alloca(size_t x) { 
+  return __builtin_alloca(x);
+}
 
 int atomic_fetch_add(void* x, int y) { STUBBY }
 int atomic_fetch_and(void* x, int y) { STUBBY }
