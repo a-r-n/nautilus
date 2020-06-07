@@ -1,2 +1,3 @@
-../qjsc -c -o ../repl.c -m real_repl.js
+cp real_repl.js repl.js
+../qjsc -c -o ../repl.c -m repl.js
 
