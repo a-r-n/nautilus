@@ -84,7 +84,7 @@
 /* dump objects freed by the garbage collector */
 //#define DUMP_GC_FREE
 /* dump objects leaking when freeing the runtime */
-#define DUMP_LEAKS  1
+//#define DUMP_LEAKS  1
 /* dump memory usage before running the garbage collector */
 //#define DUMP_MEM
 //#define DUMP_OBJECTS    /* dump objects in JS_FreeContext */
@@ -95,7 +95,7 @@
 //#define DUMP_READ_OBJECT
 
 /* test the GC by forcing it before each object allocation */
-#define FORCE_GC_AT_MALLOC
+//#define FORCE_GC_AT_MALLOC
 
 #ifdef CONFIG_ATOMICS
 //#include <pthread.h>
@@ -1284,7 +1284,6 @@ static void *js_bf_realloc(void *opaque, void *ptr, size_t size)
 /* Throw out of memory in case of error */
 void *js_malloc(JSContext *ctx, size_t size)
 {
-    DEBUG_PRINT("js_malloc");
     void *ptr;
     ptr = js_malloc_rt(ctx->rt, size);
     if (unlikely(!ptr)) {
@@ -1626,7 +1625,7 @@ static inline size_t js_def_malloc_usable_size(void *ptr)
 
 static void *js_def_malloc(JSMallocState *s, size_t size)
 {
-    DEBUG_PRINT("js_def_malloc called");
+    //DEBUG_PRINT("js_def_malloc called");
     void *ptr;
 
     /* Do not allocate zero bytes: behavior is platform dependent */
@@ -15842,6 +15841,7 @@ static JSValue JS_CallInternal(JSContext *caller_ctx, JSValueConst func_obj,
         call_func = rt->class_array[p->class_id].call;
         if (!call_func) {
         not_a_function:
+            DEBUG_PRINT("Call intenal: not a function\n");
             return JS_ThrowTypeError(caller_ctx, "not a function");
         }
         return call_func(caller_ctx, func_obj, this_obj, argc,
@@ -34485,6 +34485,7 @@ static JSValue js_number_constructor(JSContext *ctx, JSValueConst this_val,
 
 static int check_function(JSContext *ctx, JSValueConst obj)
 {
+    DEBUG_PRINT("call to check_function\n");
     if (likely(JS_IsFunction(ctx, obj)))
         return 0;
     JS_ThrowTypeError(ctx, "not a function");
@@ -43774,6 +43775,7 @@ static JSValue js_proxy_call(JSContext *ctx, JSValueConst func_obj,
         return JS_EXCEPTION;
     if (!s->is_func) {
         JS_FreeValue(ctx, method);
+        DEBUG_PRINT("NAF in js_proxy_call\n");
         return JS_ThrowTypeError(ctx, "not a function");
     }
     if (JS_IsUndefined(method))

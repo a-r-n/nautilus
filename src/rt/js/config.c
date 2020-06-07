@@ -294,9 +294,10 @@ int isfinite(double x) {
   return __builtin_isfinite(x);
 }
 
-void* alloca(size_t x) { 
-  return __builtin_alloca(x);
-}
+// void* alloca(size_t x) { 
+//   UNDEF_FUN_ERR();
+//   return __builtin_alloca(x);
+// }
 
 int atomic_fetch_add(void* x, int y) { STUBBY }
 int atomic_fetch_and(void* x, int y) { STUBBY }
