@@ -23,6 +23,10 @@
  * THE SOFTWARE.
  */
 
+#ifdef NAUT_CONFIG_JS_RT_BIGNUM
+#define CONFIG_BIGNUM
+#endif
+
 #ifdef DEF
 
 /* Note: first atoms are considered as keywords in the parser */

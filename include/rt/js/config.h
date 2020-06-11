@@ -19,6 +19,10 @@
 #define _fprintf fprintf
 #define _putc(c, stdout) PUTC(c)
 
+#ifdef NAUT_CONFIG_JS_RT_BIGNUM
+#define CONFIG_BIGNUM
+#endif
+
 #ifndef NAUT_CONFIG_JS_RT_DEBUG
 #undef DEBUG_PRINT
 #define DEBUG_PRINT(fmt, args...)
@@ -39,7 +43,7 @@ int open(const char* pathname, int flags);
 int openm(const char* pathname, int flags, int mode);
 int close(int fd);
 
-// typedef char int8_t;
+// typedef sint8_t int8_t;
 typedef sint16_t int16_t;
 typedef sint32_t int32_t;
 typedef sint64_t int64_t;
@@ -61,11 +65,7 @@ struct timeval {
 #define INFINITY 1.0 / 0.0
 #define NEG_INF -1.0 / 0.0
 
-// Floating point environment compilation patch
-// TODO: it is very likely we need to better implement this
-#define FE_TONEAREST 0
-#define FE_DOWNWARD 0
-#define FE_UPWARD 0
+#include <fenv.h>
 
 // Threading compilation patch. This is a TODO
 #define ETIMEDOUT 1
@@ -155,7 +155,7 @@ double cbrt(double);
 #define assert(x)             \
   do {                        \
     if (!(x)) {               \
-      panic("ASSERT FAILED"); \
+      DEBUG_PRINT("ASSERT FAILED"); \
     }                         \
   } while (false)
 

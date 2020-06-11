@@ -798,15 +798,30 @@ STUBBY
 }
 double ceil(double x)
 {
-STUBBY
+    //TODO: check the edge cases
+    if (x > 0x20000000000000 || x < -0x20000000000000) {
+        return x;
+    }
+    double i = (sint64_t)x;
+    return i > 0 ? i + 1 : i;
 }
 double floor(double x)
 {
-STUBBY
+    //TODO: check the edge cases
+    if (x > 0x20000000000000 || x < -0x20000000000000) {
+        return x;
+    }
+    double i = (sint64_t)x;
+    return i > 0 ? i : i + 1;
 }
 double trunc(double x)
 {
-STUBBY
+    //TODO: check the edge cases
+    if (x > 0x20000000000000 || x < -0x20000000000000) {
+        return x;
+    }
+    double i = (sint64_t)x;
+    return i;
 }
 double expm1(double x)
 {
@@ -820,9 +835,29 @@ double sqrt(double x)
 {
 STUBBY
 }
-double pow(double x, double y)
-{
-STUBBY
+
+// Oversimplified solution
+double pow(double x, double y) {
+    if (x < 0 || y < 0) {
+        ERROR_PRINT("pow is not implemented for negative inputs");
+        return 0;
+    }
+    int y_int = (int)y;
+    double r_accumulator = 1.;
+
+    if (y != y_int) {
+        ERROR_PRINT("pow is not implemented for fractional powers");
+    }
+
+    //TODO: don't use the naive solution
+    for (int i = 0; i < y_int; i++) {
+        r_accumulator *= x;
+    }
+
+    //TODO: account for the decimal component of y (possibly using the taylor expansion method)
+    // ^ depends on log being implemented
+
+    return r_accumulator;
 }
 double log(double x)
 {

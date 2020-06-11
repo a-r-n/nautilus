@@ -23,6 +23,9 @@
  * THE SOFTWARE.
  */
 
+// #pragma GCC optimize ("O0")
+// #pragma optimize level=0
+
 #define CONFIG_VERSION "NAUT_0" //TODO
 
 //#include <nautilus/thread.h>
@@ -37,8 +40,10 @@
 
 #include <nautilus/timer.h>
 
+#define CONFIG_BIGNUM
+
 #ifdef CONFIG_BIGNUM
-#include "libbf.h"
+#include <rt/js/libbf.h>
 #endif
 
 
