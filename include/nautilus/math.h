@@ -23,7 +23,6 @@
 #ifndef __MATH_H__
 #define __MATH_H__
 
-#include <stdint.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
