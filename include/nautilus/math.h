@@ -23,6 +23,7 @@
 #ifndef __MATH_H__
 #define __MATH_H__
 
+#include <stdint.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -175,10 +176,12 @@ unsigned long __roundup_pow_of_two(unsigned long n)
 static int 
 isnan (float x)
 {
-    int i = (int)x;
-    i &= 0x7fffffff;
-    i =  0x7f800000 - i;
-    return (int)(((uint32_t)(i)) >> 31);
+	union {
+		uint32_t i;
+		float f;
+	} u;
+    u.f = x;
+    return ((u.i & 0x7F800000) == 0x7F800000) && (u.i & 0x7FFFFF);
 }
 
 #ifdef __cplusplus
