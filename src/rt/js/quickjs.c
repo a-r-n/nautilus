@@ -40,8 +40,6 @@
 
 #include <nautilus/timer.h>
 
-#define CONFIG_BIGNUM
-
 #ifdef CONFIG_BIGNUM
 #include <rt/js/libbf.h>
 #endif
