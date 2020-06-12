@@ -48,6 +48,8 @@ int errno=0;
         return 0; \
     } 
 
+#define NAIVE_IMPLEMENTATION_WARNING() DEBUG_PRINT("Function (%s) may be naively implemented", __func__)
+
 
 // Structs needed for LUA 
 
@@ -798,6 +800,7 @@ STUBBY
 }
 double ceil(double x)
 {
+    NAIVE_IMPLEMENTATION_WARNING();
     //TODO: check the edge cases
     if (x > 0x20000000000000 || x < -0x20000000000000) {
         return x;
@@ -807,6 +810,7 @@ double ceil(double x)
 }
 double floor(double x)
 {
+    NAIVE_IMPLEMENTATION_WARNING();
     //TODO: check the edge cases
     if (x > 0x20000000000000 || x < -0x20000000000000) {
         return x;
@@ -816,6 +820,7 @@ double floor(double x)
 }
 double trunc(double x)
 {
+    NAIVE_IMPLEMENTATION_WARNING();
     //TODO: check the edge cases
     if (x > 0x20000000000000 || x < -0x20000000000000) {
         return x;
@@ -838,6 +843,7 @@ STUBBY
 
 // Oversimplified solution
 double pow(double x, double y) {
+    NAIVE_IMPLEMENTATION_WARNING();
     if (x < 0 || y < 0) {
         ERROR_PRINT("pow is not implemented for negative inputs");
         return 0;
