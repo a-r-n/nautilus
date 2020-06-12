@@ -48,7 +48,7 @@ int errno=0;
         return 0; \
     } 
 
-#define NAIVE_IMPLEMENTATION_WARNING() DEBUG_PRINT("Function (%s) may be naively implemented", __func__)
+#define NAIVE_IMPLEMENTATION_WARNING() DEBUG_PRINT("Function (%s) may be naively implemented\n", __func__)
 
 
 // Structs needed for LUA 
@@ -845,14 +845,14 @@ STUBBY
 double pow(double x, double y) {
     NAIVE_IMPLEMENTATION_WARNING();
     if (x < 0 || y < 0) {
-        ERROR_PRINT("pow is not implemented for negative inputs");
+        ERROR_PRINT("pow is not implemented for negative inputs\n");
         return 0;
     }
     int y_int = (int)y;
     double r_accumulator = 1.;
 
     if (y != y_int) {
-        ERROR_PRINT("pow is not implemented for fractional powers");
+        ERROR_PRINT("pow is not implemented for fractional powers\n");
     }
 
     //TODO: don't use the naive solution
